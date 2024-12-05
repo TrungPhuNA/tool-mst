@@ -1,6 +1,6 @@
 python -m venv venv
 source venv/bin/activate
-pip install selenium beautifulsoup4 flask
+pip install selenium beautifulsoup4 flask mysql-connector-python
 pip freeze
 
 
