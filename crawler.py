@@ -10,9 +10,20 @@ import json
 
 
 def crawl_masothue(query):
-    service = Service("chromedriver")
+    # service = Service("chromedriver")
+    # options = Options()
+    # driver = webdriver.Chrome(service=service, options=options)
+
+    # Đảm bảo chỉ định đúng đường dẫn đến chromedriver nếu không có trong PATH
+    service = Service("/usr/local/bin/chromedriver")  # Đảm bảo đường dẫn đúng
+
+    # Cấu hình các tuỳ chọn cho Chrome (nếu cần)
     options = Options()
+    options.binary_location = "/usr/bin/chromium"  # Nếu bạn sử dụng Chromium thay vì Chrome
+
+    # Khởi tạo WebDriver với chromedriver
     driver = webdriver.Chrome(service=service, options=options)
+
     print("=================== driver",driver)
     try:
         # Mở trang web masothue.com
