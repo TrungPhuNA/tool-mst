@@ -27,7 +27,7 @@ def crawl_masothue(query):
         driver.get("https://masothue.com/")
 
         # Tìm ô input và nhập query
-        search_box = WebDriverWait(driver, 10).until(
+        search_box = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
         search_box.clear()
@@ -35,7 +35,7 @@ def crawl_masothue(query):
         search_box.send_keys(Keys.RETURN)
 
         # Đợi trang redirect
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-taxinfo"))
         )
 
