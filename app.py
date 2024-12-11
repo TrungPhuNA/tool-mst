@@ -21,31 +21,31 @@ def get_tax_info():
     if not param:
         return jsonify({"error": "Missing required parameter 'param'"}), 400
 
-    # #Kiểm tra trong cơ sở dữ liệu trước
-    # try:
-    #     connection = get_db_connection()
-    #     cursor = connection.cursor()
+    #Kiểm tra trong cơ sở dữ liệu trước
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
-    #     # Kiểm tra nếu mã số thuế đã tồn tại trong DB
-    #     cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (param,))
-    #     result = cursor.fetchone()
-    #     cursor.close()
-    #     connection.close()
+        # Kiểm tra nếu mã số thuế đã tồn tại trong DB
+        cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (param,))
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
-    #     if result:
-    #         print("Data fetched from DB:", result)
-    #         return jsonify({
-    #             "id": result["tax_id"],
-    #             "name": result["name"],
-    #             "address": result["address"],
-    #             "status": result["status"],
-    #             "representative": result["representative"],
-    #             "management": result["management"],
-    #             "activeDate": result["active_date"],
-    #             "source_url": result["source_url"]
-    #         }), 200
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 500
+        if result:
+            print("Data fetched from DB:", result)
+            return jsonify({
+                "id": result["tax_id"],
+                "name": result["name"],
+                "address": result["address"],
+                "status": result["status"],
+                "representative": result["representative"],
+                "management": result["management"],
+                "activeDate": result["active_date"],
+                "source_url": result["source_url"]
+            }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     # Nếu không tồn tại, crawler dữ liệu
     print("================ param: ", param)
@@ -55,7 +55,9 @@ def get_tax_info():
 
     # Lưu vào database
     try:
-        save_to_db(result)
+        if result["code"] == "00":
+            save_to_db(result["data"])
+        
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
