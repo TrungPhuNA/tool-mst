@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.chrome.options import Options
+import traceback
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 import json
@@ -87,6 +87,7 @@ def crawl_masothue(query):
 
     except Exception as e:
         print(f"Error: {e}")
+        traceback.print_exc() 
         return None
 
     finally:
