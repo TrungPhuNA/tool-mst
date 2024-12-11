@@ -17,9 +17,9 @@ DB_NAME = os.getenv('DB_NAME')
 @app.route("/api/get-tax-info", methods=["GET"])
 def get_tax_info():
     # Lấy tham số từ request
-    # param = request.args.get("param")
-    # if not param:
-    #     return jsonify({"error": "Missing required parameter 'param'"}), 400
+    param = request.args.get("param")
+    if not param:
+        return jsonify({"error": "Missing required parameter 'param'"}), 400
 
     # #Kiểm tra trong cơ sở dữ liệu trước
     # try:
