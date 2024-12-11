@@ -46,9 +46,10 @@ def crawl_masothue(query):
         # Lấy HTML của trang đích
         soup = BeautifulSoup(driver.page_source, "html.parser")
         tax_info = parse_tax_info(soup)
-
         if not tax_info:
             raise ValueError("Không tìm thấy dữ liệu.")
+        
+        tax_info["source_url"] = current_url
 
         # Tạo kết quả JSON
         result = {
