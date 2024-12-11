@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import json
 
@@ -27,8 +28,9 @@ def crawl_masothue(query):
     chrome_options.add_argument('--headless')  # Chạy ở chế độ không giao diện (nếu cần)
 
     # Khởi tạo WebDriver
-    service = Service('/usr/local/bin/chromedriver')
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    # service = Service('/usr/local/bin/chromedriver')
+    # driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     print("=================== driver",driver)
     try:

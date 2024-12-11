@@ -8,11 +8,9 @@ pip freeze
 pip freeze > requirements.txt
 https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
 
-
-
 #INSTALL
 pipenv shell
-pipenv install selenium beautifulsoup4 flask mysql-connector-python gunicorn
+pipenv install selenium beautifulsoup4 flask mysql-connector-python gunicorn webdriver-manager
 flask run
 
 # chay
