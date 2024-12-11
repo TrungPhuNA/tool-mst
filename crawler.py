@@ -14,7 +14,7 @@ def crawl_masothue(query):
 
     selenium_grid_url = "http://localhost:4444/wd/hub"
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
 
@@ -30,7 +30,7 @@ def crawl_masothue(query):
         driver.get("https://masothue.com/")
 
         # Tìm ô input và nhập query
-        search_box = WebDriverWait(driver, 10).until(
+        search_box = WebDriverWait(driver, 50).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
         search_box.clear()
