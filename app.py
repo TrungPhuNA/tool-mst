@@ -45,6 +45,7 @@ def get_tax_info():
                 "source_url": result["source_url"]
             }), 200
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
     # Nếu không tồn tại, crawler dữ liệu
