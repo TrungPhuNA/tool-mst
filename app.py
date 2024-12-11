@@ -16,7 +16,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 
 
-@app.route("/tax-info-list", methods=["GET"])
+@app.route("/", methods=["GET"])
 def tax_info_list():
     try:
         # Lấy tham số tìm kiếm và phân trang
