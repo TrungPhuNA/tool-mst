@@ -35,14 +35,18 @@ def get_tax_info():
         if result:
             print("Data fetched from DB:", result)
             return jsonify({
-                "id": result["tax_id"],
-                "name": result["name"],
-                "address": result["address"],
-                "status": result["status"],
-                "representative": result["representative"],
-                "management": result["management"],
-                "activeDate": result["active_date"],
-                "source_url": result["source_url"]
+                "code": "00",
+                "desc": "Success - Thành công",
+                "data": {
+                    "id": result["tax_id"],
+                    "name": result["name"],
+                    "address": result["address"],
+                    "status": result["status"],
+                    "representative": result["representative"],
+                    "management": result["management"],
+                    "activeDate": result["active_date"].strftime('%Y-%m-%d') if result["active_date"] else None,
+                    "source_url": result["source_url"]
+                }
             }), 200
     except Exception as e:
         traceback.print_exc()
