@@ -12,9 +12,16 @@ import json
 
 def crawl_masothue(query):
 
+    selenium_grid_url = "http://localhost:4444/wd/hub"
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--no-sandbox')
+
+    # Kết nối với Docker container Selenium
     driver = webdriver.Remote(
-        command_executor='http://localhost:4444/wd/hub',
-        desired_capabilities=DesiredCapabilities.CHROME
+        command_executor=selenium_grid_url,
+        options=chrome_options
     )
 
     print("=================== driver",driver)
