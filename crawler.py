@@ -4,34 +4,17 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 import json
 
 
 def crawl_masothue(query):
-    # service = Service("chromedriver")
-    # options = Options()
-    # driver = webdriver.Chrome(service=service, options=options)
 
-
-    # Đảm bảo chỉ định đúng đường dẫn đến chromedriver nếu không có trong PATH
-    chromium_path = "/usr/bin/chromium-browser"
-
-    # Cấu hình các tuỳ chọn cho Chrome (nếu cần)
-    chrome_options = Options()
-    chrome_options.binary_location = chromium_path
-    chrome_options.add_argument('--no-sandbox')  # Chạy mà không kiểm tra sandbox (fix lỗi DevToolsActivePort)
-    chrome_options.add_argument('--disable-dev-shm-usage')  # Giảm sử dụng bộ nhớ chia sẻ
-    chrome_options.add_argument('--disable-gpu')  # Vô hiệu hóa GPU (cho môi trường headless)
-    chrome_options.add_argument('--headless')  # Chạy ở chế độ không giao diện (nếu cần)
-
-    # Khởi tạo WebDriver
-    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
+    driver = webdriver.Remote(
+        command_executor='http://localhost:4444/wd/hub',
+        desired_capabilities=DesiredCapabilities.CHROME
     )
 
     print("=================== driver",driver)
