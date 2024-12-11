@@ -14,10 +14,8 @@ def get_db_connection():
     return connection
 
 
-# Lưu dữ liệu vào MySQL
 def save_to_db(data):
-
-    print("============== DATA SAVE DB =========== ",data)
+    print("============== DATA SAVE DB =========== ", data)
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -25,24 +23,43 @@ def save_to_db(data):
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tax_info (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            tax_id VARCHAR(50) UNIQUE,
             name VARCHAR(255),
-            tax_info JSON,
-            business_info JSON,
+            address TEXT,
+            status VARCHAR(255),
+            representative VARCHAR(255),
+            management VARCHAR(255),
+            active_date DATE,
             source_url TEXT
         )
     """)
 
-    # Chèn dữ liệu
+    # Kiểm tra nếu tax_id đã tồn tại trong DB
+    cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (data['id'],))
+    result = cursor.fetchone()
+    if result:
+        print("Data already exists in DB:", result)
+        cursor.close()
+        connection.close()
+        return result  # Trả về dữ liệu từ DB nếu đã tồn tại
+
+    # Chèn dữ liệu mới
     cursor.execute("""
-        INSERT INTO tax_info (name, tax_info, business_info, source_url)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO tax_info (tax_id, name, address, status, representative, management, active_date, source_url)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """, (
+        data['id'],
         data['name'],
-        json.dumps(data['tax_info']),
-        json.dumps(data['business_info']),
+        data['address'],
+        data['status'],
+        data['representative'],
+        data['management'],
+        data['activeDate'],
         data['source_url']
     ))
 
     connection.commit()
     cursor.close()
     connection.close()
+    print("Data inserted into DB successfully!")
+    return data  # Trả về dữ liệu vừa được chèn
