@@ -21,6 +21,10 @@ def crawl_masothue(query):
     # Cấu hình các tuỳ chọn cho Chrome (nếu cần)
     chrome_options = Options()
     chrome_options.binary_location = chromium_path
+    chrome_options.add_argument('--no-sandbox')  # Chạy mà không kiểm tra sandbox (fix lỗi DevToolsActivePort)
+    chrome_options.add_argument('--disable-dev-shm-usage')  # Giảm sử dụng bộ nhớ chia sẻ
+    chrome_options.add_argument('--disable-gpu')  # Vô hiệu hóa GPU (cho môi trường headless)
+    chrome_options.add_argument('--headless')  # Chạy ở chế độ không giao diện (nếu cần)
 
     # Khởi tạo WebDriver
     service = Service('/usr/local/bin/chromedriver')
