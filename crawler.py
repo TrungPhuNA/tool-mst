@@ -28,9 +28,11 @@ def crawl_masothue(query):
     chrome_options.add_argument('--headless')  # Chạy ở chế độ không giao diện (nếu cần)
 
     # Khởi tạo WebDriver
-    # service = Service('/usr/local/bin/chromedriver')
-    # driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager(version="126.0.6478.114").install()), 
+        options=chrome_options
+    )
 
     print("=================== driver",driver)
     try:
