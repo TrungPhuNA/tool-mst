@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from crawler import crawl_masothue
 from models import save_to_db, get_db_connection
 from dotenv import load_dotenv
@@ -13,6 +13,58 @@ DB_PORT = os.getenv('DB_PORT')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
+
+
+@app.route("/tax-info-list", methods=["GET"])
+def tax_info_list():
+    try:
+        # Lấy tham số tìm kiếm và phân trang
+        search_query = request.args.get("search", "").strip()
+        page = int(request.args.get("page", 1))
+        limit = 10
+        offset = (page - 1) * limit
+
+        # Kết nối database
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Query dữ liệu
+        if search_query:
+            cursor.execute("""
+                SELECT * FROM tax_info 
+                WHERE tax_id LIKE %s OR name LIKE %s OR address LIKE %s 
+                LIMIT %s OFFSET %s
+            """, (f"%{search_query}%", f"%{search_query}%", f"%{search_query}%", limit, offset))
+        else:
+            cursor.execute("SELECT * FROM tax_info LIMIT %s OFFSET %s", (limit, offset))
+        
+        tax_info_list = cursor.fetchall()
+
+        # Đếm tổng số bản ghi để tính tổng số trang
+        if search_query:
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM tax_info 
+                WHERE tax_id LIKE %s OR name LIKE %s OR address LIKE %s
+            """, (f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"))
+        else:
+            cursor.execute("SELECT COUNT(*) as total FROM tax_info")
+        total = cursor.fetchone()["total"]
+        total_pages = math.ceil(total / limit)
+
+        cursor.close()
+        connection.close()
+
+        # Render giao diện với dữ liệu
+        return render_template("tax_info_list.html", 
+                               tax_info_list=tax_info_list, 
+                               search_query=search_query, 
+                               page=page, 
+                               total_pages=total_pages)
+    except Exception as e:
+        traceback.print_exc()
+        return f"An error occurred: {e}", 500
+
+
 
 @app.route("/api/get-tax-info", methods=["GET"])
 def get_tax_info():
