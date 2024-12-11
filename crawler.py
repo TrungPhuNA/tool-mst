@@ -11,26 +11,23 @@ import json
 
 
 def crawl_masothue(query):
-
     selenium_grid_url = "http://localhost:4444/wd/hub"
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')  # Uncomment nếu cần chạy headless
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
 
-    # Kết nối với Docker container Selenium
     driver = webdriver.Remote(
         command_executor=selenium_grid_url,
         options=chrome_options
     )
 
-    print("=================== driver",driver)
     try:
         # Mở trang web masothue.com
         driver.get("https://masothue.com/")
 
         # Tìm ô input và nhập query
-        search_box = WebDriverWait(driver, 50).until(
+        search_box = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
         search_box.clear()
@@ -48,26 +45,17 @@ def crawl_masothue(query):
 
         # Lấy HTML của trang đích
         soup = BeautifulSoup(driver.page_source, "html.parser")
-
-        soup = BeautifulSoup(driver.page_source, "html.parser")
         tax_info = parse_tax_info(soup)
+
+        if not tax_info:
+            raise ValueError("Không tìm thấy dữ liệu.")
 
         # Tạo kết quả JSON
         result = {
             "code": "00",
             "desc": "Success - Thành công",
-            "data": {
-                "id": tax_info["id"],
-                "name": tax_info["name"],
-                "internationalName": tax_info["internationalName"],
-                "shortName": tax_info["shortName"],
-                "address": tax_info["address"],
-                "status": tax_info["status"],
-                "representative": tax_info["representative"],
-                "management": tax_info["management"],
-                "activeDate": tax_info["activeDate"]
-            },
-            "source_url": driver.current_url
+            "data": tax_info,
+            "source_url": current_url
         }
 
         # Ghi ra file JSON
@@ -78,27 +66,29 @@ def crawl_masothue(query):
 
     except Exception as e:
         print(f"Error: {e}")
-        traceback.print_exc() 
+        traceback.print_exc()
         return None
 
     finally:
         driver.quit()
-
-
+        
 def parse_tax_info(soup):
     tax_info_table = soup.select_one("table.table-taxinfo")
     tax_info = {}
     if tax_info_table:
         rows = tax_info_table.select("tbody tr")
         for row in rows:
-            key = row.select_one("td:nth-child(1)").text.strip()
-            value = row.select_one("td:nth-child(2)").text.strip()
-            tax_info[key] = value
+            try:
+                key = row.select_one("td:nth-child(1)").text.strip()
+                value = row.select_one("td:nth-child(2)").text.strip()
+                tax_info[key] = value
+            except AttributeError:
+                continue  # Nếu thiếu dữ liệu trong một dòng, bỏ qua dòng đó
 
     # Định dạng lại tax_info thành key-value cụ thể
     formatted_tax_info = {
-        "id": tax_info.get("Mã số thuế cá nhân", tax_info.get("Mã số thuế", "")),
-        "name": tax_info.get("Tên quốc tế", ""),
+        "id": tax_info.get("Mã số thuế", ""),
+        "name": tax_info.get("Tên người nộp thuế", ""),
         "internationalName": tax_info.get("Tên quốc tế", ""),
         "shortName": tax_info.get("Tên viết tắt", ""),
         "address": tax_info.get("Địa chỉ", ""),
