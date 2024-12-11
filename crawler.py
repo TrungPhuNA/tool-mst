@@ -49,34 +49,25 @@ def crawl_masothue(query):
         # Lấy HTML của trang đích
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Trích xuất thông tin từ bảng "table-taxinfo"
-        tax_info_table = soup.select_one("table.table-taxinfo")
-        tax_info = {}
-        if tax_info_table:
-            rows = tax_info_table.select("tbody tr")
-            for row in rows:
-                cells = [cell.text.strip() for cell in row.select("td")]
-                if len(cells) == 2:
-                    tax_info[cells[0]] = cells[1]
-
-        # Trích xuất các thông tin khác từ HTML
-        name = soup.select_one("table.table-taxinfo th span.copy").text.strip() if soup.select_one("table.table-taxinfo th span.copy") else "N/A"
-
-        # Trích xuất thông tin kinh doanh (nếu có)
-        business_info = []
-        business_table = soup.select_one("table.table")
-        if business_table:
-            for row in business_table.select("tbody tr"):
-                columns = [cell.text.strip() for cell in row.select("td")]
-                if len(columns) == 2:
-                    business_info.append({"ID": columns[0], "Careers": columns[1]})
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        tax_info = parse_tax_info(soup)
 
         # Tạo kết quả JSON
         result = {
-            "name": name,
-            "tax_info": tax_info,
-            "business_info": business_info,
-            "source_url": current_url,  # URL nguồn để tham chiếu
+            "code": "00",
+            "desc": "Success - Thành công",
+            "data": {
+                "id": tax_info["id"],
+                "name": tax_info["name"],
+                "internationalName": tax_info["internationalName"],
+                "shortName": tax_info["shortName"],
+                "address": tax_info["address"],
+                "status": tax_info["status"],
+                "representative": tax_info["representative"],
+                "management": tax_info["management"],
+                "activeDate": tax_info["activeDate"]
+            },
+            "source_url": driver.current_url
         }
 
         # Ghi ra file JSON
@@ -93,6 +84,31 @@ def crawl_masothue(query):
     finally:
         driver.quit()
 
+
+def parse_tax_info(soup):
+    tax_info_table = soup.select_one("table.table-taxinfo")
+    tax_info = {}
+    if tax_info_table:
+        rows = tax_info_table.select("tbody tr")
+        for row in rows:
+            key = row.select_one("td:nth-child(1)").text.strip()
+            value = row.select_one("td:nth-child(2)").text.strip()
+            tax_info[key] = value
+
+    # Định dạng lại tax_info thành key-value cụ thể
+    formatted_tax_info = {
+        "id": tax_info.get("Mã số thuế cá nhân", tax_info.get("Mã số thuế", "")),
+        "name": tax_info.get("Tên quốc tế", ""),
+        "internationalName": tax_info.get("Tên quốc tế", ""),
+        "shortName": tax_info.get("Tên viết tắt", ""),
+        "address": tax_info.get("Địa chỉ", ""),
+        "status": tax_info.get("Tình trạng", ""),
+        "representative": tax_info.get("Người đại diện", ""),
+        "management": tax_info.get("Quản lý bởi", ""),
+        "activeDate": tax_info.get("Ngày hoạt động", "")
+    }
+
+    return formatted_tax_info
 
 if __name__ == "__main__":
     query = "8489390028"  # Thay bằng MST hoặc CCCD bạn muốn tìm
