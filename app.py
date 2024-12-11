@@ -24,7 +24,7 @@ def get_tax_info():
     #Kiểm tra trong cơ sở dữ liệu trước
     try:
         connection = get_db_connection()
-        cursor = connection.cursor()
+        cursor = connection.cursor(dictionary=True)
 
         # Kiểm tra nếu mã số thuế đã tồn tại trong DB
         cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (param,))
