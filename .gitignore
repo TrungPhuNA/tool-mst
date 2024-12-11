@@ -3,3 +3,4 @@ venv
 .env
 Pipfile.lock
 result.json
+.idea
