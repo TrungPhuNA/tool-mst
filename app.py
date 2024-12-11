@@ -4,6 +4,7 @@ from models import save_to_db, get_db_connection
 from dotenv import load_dotenv
 import traceback
 import os
+import math
 
 load_dotenv()
 app = Flask(__name__)
