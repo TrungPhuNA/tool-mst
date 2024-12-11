@@ -56,7 +56,11 @@ def get_tax_info():
     print("================ param: ", param)
     result = crawl_masothue(param)
     if not result:
-        return jsonify({"error": "Failed to fetch data"}), 500
+        return jsonify({
+            "code": "99",
+            "desc": "Failed to fetch data",
+            "data": {}
+        }), 500
 
     # Lưu vào database
     try:
