@@ -10,7 +10,8 @@ https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-d
 
 #INSTALL
 pipenv shell
-pipenv install selenium beautifulsoup4 flask mysql-connector-python gunicorn
+pipenv install selenium beautifulsoup4 flask mysql-connector-python gunicorn python-dotenv
+
 flask run
 
 # chay

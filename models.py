@@ -1,14 +1,15 @@
 import mysql.connector
 import json
+import os
 
 # Kết nối MySQL
 def get_db_connection():
     connection = mysql.connector.connect(
-        host="127.0.0.1",
-        user="root",     
-        password="", 
-        port="3306",
-        database="crawler_mst",
+        host=os.getenv('DB_HOST'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        port=os.getenv('DB_PORT'),
+        database=os.getenv('DB_NAME'),
     )
     return connection
 
