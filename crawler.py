@@ -71,8 +71,13 @@ def crawl_masothue(query):
 
     finally:
         driver.quit()
-        
+
 def parse_tax_info(soup):
+    tax_id = ""
+    h1_tag = soup.select_one("h1.h1")
+    if h1_tag:
+        tax_id = h1_tag.text.split(" - ")[0].strip()  # Lấy phần mã số thuế trước dấu " - "
+
     tax_info_table = soup.select_one("table.table-taxinfo")
     tax_info = {}
     if tax_info_table:
@@ -87,7 +92,7 @@ def parse_tax_info(soup):
 
     # Định dạng lại tax_info thành key-value cụ thể
     formatted_tax_info = {
-        "id": tax_info.get("Mã số thuế", ""),
+        "id": tax_id,
         "name": tax_info.get("Tên người nộp thuế", ""),
         "internationalName": tax_info.get("Tên quốc tế", ""),
         "shortName": tax_info.get("Tên viết tắt", ""),
