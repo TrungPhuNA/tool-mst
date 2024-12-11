@@ -93,6 +93,7 @@ def get_tax_info():
                 "data": {
                     "id": result["tax_id"],
                     "name": result["name"],
+                    "internationalName": result["international_name"],
                     "address": result["address"],
                     "status": result["status"],
                     "representative": result["representative"],
