@@ -14,15 +14,17 @@ def crawl_masothue(query):
     # options = Options()
     # driver = webdriver.Chrome(service=service, options=options)
 
+
     # Đảm bảo chỉ định đúng đường dẫn đến chromedriver nếu không có trong PATH
-    service = Service("/usr/local/bin/chromedriver")  # Đảm bảo đường dẫn đúng
+    chromium_path = "/usr/bin/chromium-browser"
 
     # Cấu hình các tuỳ chọn cho Chrome (nếu cần)
-    options = Options()
-    options.binary_location = "/usr/bin/chromium"  # Nếu bạn sử dụng Chromium thay vì Chrome
+    chrome_options = Options()
+    chrome_options.binary_location = chromium_path
 
-    # Khởi tạo WebDriver với chromedriver
-    driver = webdriver.Chrome(service=service, options=options)
+    # Khởi tạo WebDriver
+    service = Service('/usr/local/bin/chromedriver')
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     print("=================== driver",driver)
     try:
