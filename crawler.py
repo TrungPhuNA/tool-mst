@@ -30,7 +30,7 @@ def crawl_masothue(query):
     # Khởi tạo WebDriver
     # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager(version="126.0.6478.114").install()), 
+        service=Service(ChromeDriverManager().install()),
         options=chrome_options
     )
 
