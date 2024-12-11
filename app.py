@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from crawler import crawl_masothue
 from models import save_to_db, get_db_connection
 from dotenv import load_dotenv
+import traceback
 import os
 
 load_dotenv()
@@ -16,11 +17,11 @@ DB_NAME = os.getenv('DB_NAME')
 @app.route("/api/get-tax-info", methods=["GET"])
 def get_tax_info():
     # Lấy tham số từ request
-    param = request.args.get("param")
-    if not param:
-        return jsonify({"error": "Missing required parameter 'param'"}), 400
+    # param = request.args.get("param")
+    # if not param:
+    #     return jsonify({"error": "Missing required parameter 'param'"}), 400
 
-    # Kiểm tra trong cơ sở dữ liệu trước
+    # #Kiểm tra trong cơ sở dữ liệu trước
     # try:
     #     connection = get_db_connection()
     #     cursor = connection.cursor()
@@ -56,6 +57,8 @@ def get_tax_info():
     try:
         save_to_db(result)
     except Exception as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
     # Trả về kết quả JSON
