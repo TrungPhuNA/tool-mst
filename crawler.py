@@ -13,7 +13,6 @@ import json
 def crawl_masothue(query):
     selenium_grid_url = "http://localhost:4444/wd/hub"
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument('--headless')  # Uncomment nếu cần chạy headless
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
 
