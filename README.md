@@ -17,8 +17,12 @@ flask run
 Sau khi run thành công 
 pipenv install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 app:app => Chạy ok rồi thì  nohup gunicorn -w 4 -b 0.0.0.0:5000 app:app &
-gunicorn -w 4 -b 0.0.0.0:5000 app:app --access-logfile gunicorn_access.log --error-logfile gunicorn_error.log
+nohup gunicorn -w 4 -b 0.0.0.0:5000 app:app --access-logfile gunicorn_access.log --error-logfile gunicorn_error.log &
 
 
 #Docker
-docker-compose up -d
+docker-compose up -di
+
+#
+Danh sách => http://mst.s-notification.com/tax-info-list
+Tìm kiếm => http://127.0.0.1:5000/api/get-tax-info?param=040094022486
