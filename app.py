@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
-from crawler import crawl_masothue
-from models import save_to_db, get_db_connection
+from tool.crawler import crawl_masothue
+from models.tax_info import save_to_db, get_db_connection
 from dotenv import load_dotenv
 import traceback
 import os
@@ -128,7 +128,31 @@ def get_tax_info():
     # Trả về kết quả JSON
     return jsonify(result), 200
 
+@app.route("/api/delete-tax-info", methods=["POST"])
+def delete_tax_info():
+    data = request.get_json()
+    tax_id = data.get("tax_id")
+    if not tax_id:
+        return jsonify({"error": "Missing required parameter 'tax_id'"}), 400
 
+    print('============= ID: ',tax_id)
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
+        # Xóa dữ liệu theo tax_id
+        cursor.execute("DELETE FROM tax_info WHERE id = %s", (tax_id,))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+        return jsonify({"code": "00", "desc": "Deleted successfully"}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+    
+
+#bat debug tự động load lại khi thay đổi code
+app.config['DEBUG'] = True
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)  # Đảm bảo `debug=True`

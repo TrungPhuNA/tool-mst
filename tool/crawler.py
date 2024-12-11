@@ -26,7 +26,7 @@ def crawl_masothue(query):
         driver.get("https://masothue.com/")
 
         # Tìm ô input và nhập query
-        search_box = WebDriverWait(driver, 30).until(
+        search_box = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
         search_box.clear()
@@ -34,7 +34,7 @@ def crawl_masothue(query):
         search_box.send_keys(Keys.RETURN)
 
         # Đợi trang redirect
-        WebDriverWait(driver, 30).until(
+        WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-taxinfo"))
         )
 
@@ -59,7 +59,7 @@ def crawl_masothue(query):
         }
 
         # Ghi ra file JSON
-        with open("result.json", "w", encoding="utf-8") as f:
+        with open("../result.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=4)
 
         return result
@@ -74,9 +74,11 @@ def crawl_masothue(query):
 
 def parse_tax_info(soup):
     tax_id = ""
+    name = ""
     h1_tag = soup.select_one("h1.h1")
     if h1_tag:
-        tax_id = h1_tag.text.split(" - ")[0].strip()  # Lấy phần mã số thuế trước dấu " - "
+        tax_id = h1_tag.text.split(" - ")[0].strip()
+        name = h1_tag.text.split(" - ")[1].strip()
 
     tax_info_table = soup.select_one("table.table-taxinfo")
     tax_info = {}
@@ -93,7 +95,7 @@ def parse_tax_info(soup):
     # Định dạng lại tax_info thành key-value cụ thể
     formatted_tax_info = {
         "id": tax_id,
-        "name": tax_info.get("Tên người nộp thuế", ""),
+        "name": name,
         "internationalName": tax_info.get("Tên quốc tế", ""),
         "shortName": tax_info.get("Tên viết tắt", ""),
         "address": tax_info.get("Địa chỉ", ""),
