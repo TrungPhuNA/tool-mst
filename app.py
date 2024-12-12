@@ -75,36 +75,37 @@ def get_tax_info():
         return jsonify({"error": "Missing required parameter 'param'"}), 400
 
     #Kiểm tra trong cơ sở dữ liệu trước
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
+    # try:
+    #
+    # except Exception as e:
+    #     traceback.print_exc()
+    #     return jsonify({"error": str(e)}), 500
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
 
-        # Kiểm tra nếu mã số thuế đã tồn tại trong DB
-        cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (param,))
-        result = cursor.fetchone()
-        cursor.close()
-        connection.close()
+    # Kiểm tra nếu mã số thuế đã tồn tại trong DB
+    cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (param,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
 
-        if result:
-            print("Data fetched from DB:", result)
-            return jsonify({
-                "code": "00",
-                "desc": "Success - Thành công",
-                "data": {
-                    "id": result["tax_id"],
-                    "name": result["name"],
-                    "internationalName": result["international_name"],
-                    "address": result["address"],
-                    "status": result["status"],
-                    "representative": result["representative"],
-                    "management": result["management"],
-                    "activeDate": result["active_date"].strftime('%Y-%m-%d') if result["active_date"] else None,
-                    "source_url": result["source_url"]
-                }
-            }), 200
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    if result:
+        print("Data fetched from DB:", result)
+        return jsonify({
+            "code": "00",
+            "desc": "Success - Thành công",
+            "data": {
+                "id": result["tax_id"],
+                "name": result["name"],
+                "internationalName": result["international_name"],
+                "address": result["address"],
+                "status": result["status"],
+                "representative": result["representative"],
+                "management": result["management"],
+                "activeDate": result["active_date"].strftime('%Y-%m-%d') if result["active_date"] else None,
+                "source_url": result["source_url"]
+            }
+        }), 200
 
     # Nếu không tồn tại, crawler dữ liệu
     print("================ param: ", param)
@@ -116,15 +117,18 @@ def get_tax_info():
             "data": {}
         }), 500
 
+    if result["code"] == "00":
+        save_to_db(result["data"])
+
     # Lưu vào database
-    try:
-        if result["code"] == "00":
-            save_to_db(result["data"])
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    # try:
+    #     if result["code"] == "00":
+    #         save_to_db(result["data"])
+    #
+    # except Exception as e:
+    #     print(f"Error: {e}")
+    #     traceback.print_exc()
+    #     return jsonify({"error": str(e)}), 500
 
     # Trả về kết quả JSON
     return jsonify(result), 200
