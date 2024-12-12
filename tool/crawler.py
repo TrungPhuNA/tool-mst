@@ -49,6 +49,7 @@ def crawl_masothue(query):
             raise ValueError("Không tìm thấy dữ liệu.")
         
         tax_info["source_url"] = current_url
+        tax_info["param_search"] = query
 
         # Tạo kết quả JSON
         result = {
@@ -59,8 +60,8 @@ def crawl_masothue(query):
         }
 
         # Ghi ra file JSON
-        with open("../result.json", "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=4)
+        # with open("../result.json", "w", encoding="utf-8") as f:
+        #     json.dump(result, f, ensure_ascii=False, indent=4)
 
         return result
 
@@ -107,10 +108,10 @@ def parse_tax_info(soup):
 
     return formatted_tax_info
 
-if __name__ == "__main__":
-    query = "8489390028"  # Thay bằng MST hoặc CCCD bạn muốn tìm
-    result = crawl_masothue(query)
-    if result:
-        print(json.dumps(result, ensure_ascii=False, indent=4))
-    else:
-        print("No data found.")
+# if __name__ == "__main__":
+#     query = "8489390028"  # Thay bằng MST hoặc CCCD bạn muốn tìm
+#     result = crawl_masothue(query)
+#     if result:
+#         print(json.dumps(result, ensure_ascii=False, indent=4))
+#     else:
+#         print("No data found.")

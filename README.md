@@ -23,8 +23,11 @@ Hoạc cập nhật tay = pkill -HUP gunicorn
 
 
 #Docker
-docker-compose up -di
+docker-compose up -d
 
+```
+ALTER TABLE `tax_info`  ADD `param_search` VARCHAR(191) NULL  AFTER `status`;
+```
 #
 Danh sách => http://mst.s-notification.com/tax-info-list
 Tìm kiếm => http://127.0.0.1:5000/api/get-tax-info?param=040094022486
