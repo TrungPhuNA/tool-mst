@@ -78,6 +78,7 @@
                     <th style="width: 25%;">Địa chỉ</th>
                     <th style="width: 10%;">Trạng thái</th>
                     <th style="width: 8%;">Ngày hoạt động</th>
+                    <th style="width: 8%;">Status Crawler</th>
                     <th style="width: 5%;">Thao tác</th>
                 </tr>
             </thead>
@@ -106,6 +107,16 @@
                         <td><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ tax.address or "N/A" }}</td>
                         <td>{{ tax.status or "N/A" }}</td>
                         <td>{{ tax.active_date or "N/A" }}</td>
+                        <td>
+                            <span class="badge rounded-pill
+                                {% if tax.crawler_status == 'success' %}
+                                    bg-primary
+                                {% else %}
+                                    danger
+                                {% endif %}">
+                                {{ tax.crawler_status }}
+                            </span>
+                        </td>
                         <td>
                             <button class="btn btn-danger btn-sm btn-delete" data-id="{{ tax.id }}"> <i class="fas fa-trash-alt"></i> Xóa</button>
                         </td>
