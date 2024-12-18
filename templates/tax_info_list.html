@@ -46,7 +46,7 @@
         <h1 class="mb-4">Danh sách mã số thuế</h1>
         <div class="row">
             <div class="col-sm-3">
-                <form method="GET" action="/tax-info-list" class="mb-4">
+                <form method="GET" action="" class="mb-4">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="{{ search_query }}">
                         <button class="btn btn-primary" type="submit">Tìm kiếm</button>
@@ -176,6 +176,15 @@
                     method: 'GET',
                     data: { param: taxId },
                     success: function (response) {
+                        console.log("=========== response", response)
+                        if(response.code && response.code == "01") {
+                            $('#crawler-result').html(`
+                                <div class="alert alert-danger">
+                                    <strong>Lỗi!</strong> ${response.desc}
+                                </div>
+                            `);
+                            return ;
+                        }
                         $('#crawler-result').html(`
                             <div class="alert alert-success">
                                 <h5>Kết quả:</h5>

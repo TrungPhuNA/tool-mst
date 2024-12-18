@@ -15,8 +15,11 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 
 # Import và đăng ký các route từ file route_crawler.py
-from route.route_crawler import bp as tax_info_routes
-app.register_blueprint(tax_info_routes)
+# from route.route_crawler import bp as tax_info_routes
+from route.route_api import bp as route_api
+from route.route_web import bp as route_web
+app.register_blueprint(route_api)
+app.register_blueprint(route_web)
 
 # Bật chế độ debug tự động load lại khi thay đổi code
 app.config['DEBUG'] = True

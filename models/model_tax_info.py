@@ -85,7 +85,7 @@ def save_to_db(data):
         connection.close()
 
 def save_data_error_to_db(data):
-    print("============== DATA SAVE DB =========== ", data)
+    print("============== DATA SAVE DB ERROR =========== ", data)
     connection = get_db_connection()
     cursor = connection.cursor()
 

@@ -9,55 +9,59 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 import json
 
-
 def crawl_masothue(query):
-    selenium_grid_url = "http://localhost:4444/wd/hub"
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--no-sandbox')
-
-    driver = webdriver.Remote(
-        command_executor=selenium_grid_url,
-        options=chrome_options
-    )
-
+    # driver = initDriveLocal()
+    driver = initDriveProd()
     try:
-        url = "https://masothue.com/";
-        # Mở trang web masothue.com
+        url = "https://masothue.com/"
         driver.get(url)
         print("========= Mở URL crawler: ", url)
+
         # Tìm ô input và nhập query
         search_box = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
-
         search_box.clear()
         search_box.send_keys(query)
         search_box.send_keys(Keys.RETURN)
         print("========= Input Search ", search_box)
 
+        # Kiểm tra modal
+        is_modal_shown = False  # Flag để kiểm tra modal
         try:
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#modal-inform .modal-body"))
+            WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.ID, "modal-inform"))
             )
-            modal_message = driver.find_element(By.CSS_SELECTOR, "#modal-inform .modal-body").text
-            print("========= Modal thông báo xuất hiện: ", modal_message)
-            return {
-                "code": "01",
-                "desc": "Failed - Từ khóa không hợp lệ, hoạc dữ liệu không tồn tại",
-                "error_message": modal_message,
-                "data": None
-            }
+            modal_body = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "#modal-inform .modal-body"))
+            )
+
+            modal_message = modal_body.text.strip()
+            print("========= Text modal thông báo: ", repr(modal_message))
+
+            if modal_message:
+                is_modal_shown = True
+                print("============ STOP =========== [01]")
+                return {
+                    "code": "01",
+                    "desc": "Failed - " + modal_message,  # Sử dụng dấu +
+                    "error_message": modal_message,
+                    "data": None
+                }
         except Exception:
             print("========= Không có modal thông báo.")
 
+        # Dừng luôn nếu modal đã hiển thị
+        if is_modal_shown:
+            return
+
+        # Nếu không có modal => tiếp tục redirect
         print("=========== REDIRECT =========== ")
-        # Đợi trang redirect
-        WebDriverWait(driver, 60).until(
+
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-taxinfo"))
         )
 
-        # Lấy URL trang đích
         current_url = driver.current_url
         print(f"Redirected to: {current_url}")
 
@@ -66,23 +70,16 @@ def crawl_masothue(query):
         tax_info = parse_tax_info(soup)
         if not tax_info:
             raise ValueError("Không tìm thấy dữ liệu.")
-        
+
         tax_info["source_url"] = current_url
         tax_info["param_search"] = query
 
-        # Tạo kết quả JSON
-        result = {
+        return {
             "code": "00",
             "desc": "Success - Thành công",
             "data": tax_info,
             "source_url": current_url
         }
-
-        # Ghi ra file JSON
-        # with open("../result.json", "w", encoding="utf-8") as f:
-        #     json.dump(result, f, ensure_ascii=False, indent=4)
-
-        return result
 
     except Exception as e:
         print(f"Error: {e}")
@@ -91,6 +88,7 @@ def crawl_masothue(query):
 
     finally:
         driver.quit()
+
 
 def parse_tax_info(soup):
     tax_id = ""
@@ -126,3 +124,23 @@ def parse_tax_info(soup):
     }
 
     return formatted_tax_info
+
+
+def initDriveProd():
+    selenium_grid_url = "http://localhost:4444/wd/hub"
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--no-sandbox')
+
+    driver = webdriver.Remote(
+        command_executor=selenium_grid_url,
+        options=chrome_options
+    )
+    return driver
+
+def initDriveLocal():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--window-size=800,600")  # Chiều rộng 600px, chiều cao 800px
+    options.add_argument("--disable-extensions")  # Tắt các extension
+    driver = webdriver.Chrome(options=options)
+    return driver
