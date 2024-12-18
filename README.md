@@ -13,7 +13,7 @@ pipenv shell
 pipenv install selenium beautifulsoup4 flask mysql-connector-python gunicorn python-dotenv
 flask run
 
-#Cấu hình run forevr
+#Cấu hình run forever
 Sau khi run thành công 
 pipenv install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 app:app => Chạy ok rồi thì  nohup gunicorn -w 4 -b 0.0.0.0:5000 app:app &
@@ -23,11 +23,20 @@ Hoạc cập nhật tay = pkill -HUP gunicorn
 
 
 #Docker
-docker-compose up -d
-
+``` 
+RUN => docker-compose up -d
+Kd lại docker => docker-compose down
+Xem logs => docker logs selenium-hub
+RUn theo file => docker-compose -f docker-compose_v2.yml up -d
 ```
-ALTER TABLE `tax_info`  ADD `param_search` VARCHAR(191) NULL  AFTER `status`;
+- Để mở trình duyệt thì cài thêm
+```
+brew install --cask tigervnc-viewer
+```
+```
+    mở tigervnc => localhost:5900 MK secret
 ```
 #
 Danh sách => http://mst.s-notification.com/tax-info-list
 Tìm kiếm => http://127.0.0.1:5000/api/get-tax-info?param=040094022486
+
