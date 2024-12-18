@@ -78,7 +78,7 @@ def get_tax_info():
     cursor.execute("SELECT * FROM tax_info WHERE param_search = %s", (param,))
     result = cursor.fetchone()
     cursor.close()
-
+    print("================ RESULT CRAWLER: ", result)
     if result:
         # Nếu có dữ liệu, kiểm tra trạng thái của crawler
         if result['crawler_status'] == 'retry' and result['retry_time'] > datetime.now():

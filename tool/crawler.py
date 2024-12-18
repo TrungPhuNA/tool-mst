@@ -11,28 +11,43 @@ import json
 
 
 def crawl_masothue(query):
-    selenium_grid_url = "http://localhost:4444/wd/hub"
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--no-sandbox')
-
-    driver = webdriver.Remote(
-        command_executor=selenium_grid_url,
-        options=chrome_options
-    )
+    options = webdriver.ChromeOptions()
+    #options.add_argument("--start-maximized")  # Mở rộng cửa sổ trình duyệt
+    options.add_argument("--window-size=800,600")  # Chiều rộng 600px, chiều cao 800px
+    options.add_argument("--disable-extensions")  # Tắt các extension
+    driver = webdriver.Chrome(options=options)
 
     try:
+        url = "https://masothue.com/";
         # Mở trang web masothue.com
-        driver.get("https://masothue.com/")
-
+        driver.get(url)
+        print("========= Mở URL crawler: ", url)
         # Tìm ô input và nhập query
         search_box = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='q']"))
         )
+
         search_box.clear()
         search_box.send_keys(query)
         search_box.send_keys(Keys.RETURN)
+        print("========= Input Search ", search_box)
 
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#modal-inform .modal-body"))
+            )
+            modal_message = driver.find_element(By.CSS_SELECTOR, "#modal-inform .modal-body").text
+            print("========= Modal thông báo xuất hiện: ", modal_message)
+            return {
+                "code": "01",
+                "desc": "Failed - Từ khóa không hợp lệ, hoạc dữ liệu không tồn tại",
+                "error_message": modal_message,
+                "data": None
+            }
+        except Exception:
+            print("========= Không có modal thông báo.")
+
+        print("=========== REDIRECT =========== ")
         # Đợi trang redirect
         WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-taxinfo"))
@@ -107,11 +122,3 @@ def parse_tax_info(soup):
     }
 
     return formatted_tax_info
-
-# if __name__ == "__main__":
-#     query = "8489390028"  # Thay bằng MST hoặc CCCD bạn muốn tìm
-#     result = crawl_masothue(query)
-#     if result:
-#         print(json.dumps(result, ensure_ascii=False, indent=4))
-#     else:
-#         print("No data found.")

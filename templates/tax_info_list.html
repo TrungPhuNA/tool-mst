@@ -175,6 +175,15 @@
                     method: 'GET',
                     data: { param: taxId },
                     success: function (response) {
+                        console.log("=========== response", response)
+                        if(response.code && response.code == "01") {
+                            $('#crawler-result').html(`
+                                <div class="alert alert-danger">
+                                    <strong>Lỗi!</strong> ${response.desc}
+                                </div>
+                            `);
+                            return ;
+                        }
                         $('#crawler-result').html(`
                             <div class="alert alert-success">
                                 <h5>Kết quả:</h5>
