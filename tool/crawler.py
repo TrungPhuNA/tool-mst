@@ -4,14 +4,19 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import traceback
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
+from models.model_tax_info import save_to_db, update_crawler_status
+
 import json
+import traceback
+import time
+
 
 def crawl_masothue(query):
-    # driver = initDriveLocal()
-    driver = initDriveProd()
+    driver = initDriveLocal()
+    # driver = initDriveProd()
     try:
         url = "https://masothue.com/"
         driver.get(url)
@@ -144,3 +149,66 @@ def initDriveLocal():
     options.add_argument("--disable-extensions")  # Tắt các extension
     driver = webdriver.Chrome(options=options)
     return driver
+
+def crawlerList(url):
+    print("URL => ", url)
+    driver = initDriveLocal()
+
+    try:
+        driver.get(url)
+        time.sleep(3)
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "tax-listing"))
+        )
+        print("Tìm thấy phần tử 'tax-listing'")
+    except TimeoutException:
+        print("Không tìm thấy phần tử 'tax-listing'. Kiểm tra lại selector hoặc thời gian chờ.")
+
+    # Lấy nội dung HTML của trang sau khi load
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+
+    tax_elements = soup.find_all("div", {"data-prefetch": True})
+
+    links = []
+    for tax_element in tax_elements:
+        mst_link = tax_element.find("a", href=True)
+        if mst_link:
+            href = mst_link['href']
+            if href.startswith("/"):  # Chỉ lấy link nội bộ
+                full_link = "https://masothue.com" + href
+                links.append(full_link)
+
+    return links
+
+
+def extract_details_from_link(links):
+    driver = initDriveLocal()
+    tax = []
+    for link in links:
+        print(f"Đang xử lý link: {link}")
+        driver.get(link)
+        time.sleep(2)  # Chờ trang tải xong
+
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "table.table-taxinfo"))
+        )
+
+        current_url = driver.current_url
+        print(f"Redirected to: {current_url}")
+
+        # Lấy HTML của trang đích
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        tax_info = parse_tax_info(soup)
+        if not tax_info:
+            raise ValueError("Không tìm thấy dữ liệu.")
+
+        tax_info["source_url"] = current_url
+        tax_info["param_search"] = tax_info["id"]
+        print("======== tax_info", tax_info["id"])
+
+        save_to_db(tax_info)  # Chèn vào DB
+        update_crawler_status(tax_info["id"], 'success')  # Cập nhật trạng thái thành công
+
+        tax.append(tax_info)
+
+    return  tax

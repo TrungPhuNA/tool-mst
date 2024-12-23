@@ -67,6 +67,7 @@
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Từ khoá</th>
                     <th>Mã số thuế</th>
                     <th>Tên công ty</th>
                     <th>Địa chỉ</th>
@@ -98,15 +99,33 @@
                 "serverSide": true,
                 "ajax": {
                     "url": "/api/get-all",
-                    "type": "GET"
+                    "type": "POST",
+                    "data": function(d) {
+                        return JSON.stringify(d);
+                    },
+                    "contentType": "application/json",
                 },
                 "columns": [
                     { "data": "id" },
+                    { "data": "param_search" },
                     { "data": "tax_id" },
                     { "data": "name" },
                     { "data": "address" },
                     { "data": "status" },
-                    { "data": "active_date" },
+                    {
+                        "data": "active_date",
+                        "render": function(data, type, row) {
+                            if (data) {
+                                const date = new Date(data);
+                                const day = date.getDate().toString().padStart(2, '0');
+                                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Tháng bắt đầu từ 0
+                                const year = date.getFullYear();
+                                return `${day}-${month}-${year}`;
+                            }
+                            return "N/A"; // Giá trị mặc định nếu không có ngày
+                        },
+                        "width": "10%"
+                    },
                     { "data": "crawler_status" }
                 ],
                 "language": {
@@ -122,6 +141,7 @@
                     }
                 }
             });
+
 
             // Crawler
             $('#btn-crawler').on('click', function () {

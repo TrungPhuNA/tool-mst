@@ -86,14 +86,16 @@ def delete_tax_info():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-@bp.route("/api/get-all", methods=["GET"])
+
+@bp.route("/api/get-all", methods=["POST"])
 def get_tax_all():
     try:
-        # Lấy các tham số từ DataTables
-        draw = int(request.args.get("draw", 1))  # Số lần gửi request
-        start = int(request.args.get("start", 0))  # Bản ghi bắt đầu
-        length = int(request.args.get("length", 10))  # Số bản ghi trên mỗi trang
-        search_value = request.args.get("search[value]", "").strip()  # Giá trị tìm kiếm
+        # Lấy dữ liệu JSON từ body
+        data = request.get_json()
+        draw = int(data.get("draw", 1))  # Số lần gửi request
+        start = int(data.get("start", 0))  # Bản ghi bắt đầu
+        length = int(data.get("length", 10))  # Số bản ghi trên mỗi trang
+        search_value = data.get("search", {}).get("value", "").strip()  # Giá trị tìm kiếm
 
         # Kết nối database
         connection = get_db_connection()
@@ -113,6 +115,13 @@ def get_tax_all():
             """
             params = (f"%{search_value}%", f"%{search_value}%", f"%{search_value}%", length, start)
             cursor.execute(query, params)
+
+            # Lấy tổng số bản ghi sau khi lọc
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM tax_info
+                WHERE tax_id LIKE %s OR name LIKE %s OR address LIKE %s
+            """, (f"%{search_value}%", f"%{search_value}%", f"%{search_value}%"))
+            total_filtered = cursor.fetchone()["total"]
         else:
             query = """
                 SELECT * FROM tax_info
@@ -121,6 +130,9 @@ def get_tax_all():
             """
             params = (length, start)
             cursor.execute(query, params)
+
+            # Tổng số bản ghi sau khi lọc là tổng số bản ghi ban đầu
+            total_filtered = total_records
 
         records = cursor.fetchall()
 
@@ -132,7 +144,7 @@ def get_tax_all():
         return jsonify({
             "draw": draw,
             "recordsTotal": total_records,  # Tổng số bản ghi trong database
-            "recordsFiltered": total_records,  # Tổng số bản ghi sau khi lọc (nếu có)
+            "recordsFiltered": total_filtered,  # Tổng số bản ghi sau khi lọc (nếu có)
             "data": records  # Dữ liệu trả về
         })
 
