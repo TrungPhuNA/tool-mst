@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 from models.model_tax_info import save_to_db, update_crawler_status
+import os
 
 import json
 import traceback
@@ -15,8 +16,13 @@ import time
 
 
 def crawl_masothue(query):
-    # driver = initDriveLocal()
-    driver = initDriveProd()
+    environment = os.getenv('APP_ENV')
+    print("============ environment =========== ", environment)
+    if environment == 'development':
+        driver = initDriveLocal()
+    else:
+        driver = initDriveProd()
+
     try:
         url = "https://masothue.com/"
         driver.get(url)
