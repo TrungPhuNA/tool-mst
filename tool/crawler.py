@@ -15,8 +15,8 @@ import time
 
 
 def crawl_masothue(query):
-    driver = initDriveLocal()
-    # driver = initDriveProd()
+    # driver = initDriveLocal()
+    driver = initDriveProd()
     try:
         url = "https://masothue.com/"
         driver.get(url)
