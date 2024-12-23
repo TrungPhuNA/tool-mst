@@ -1,0 +1,92 @@
+{% extends "layouts/app_master.html" %}
+{% block content %}
+<div class="container mt-4">
+        <h1 class="mb-4">Danh sách thành viên</h1>
+        <!-- Bảng dữ liệu -->
+        <div class="row">
+            <table id="tax-table" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Create</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+<div id="loading-overlay" class="d-none">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Khởi tạo DataTable
+        $('#tax-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/api/get-users",
+                "type": "POST",
+                "data": function(d) {
+                    return JSON.stringify(d);
+                },
+                "contentType": "application/json",
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "username" },
+                { "data": "email" },
+                {
+                    "data": "created_at",
+                    "render": function(data, type, row) {
+                        if (data) {
+                            const date = new Date(data);
+                            const day = date.getDate().toString().padStart(2, '0');
+                            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Tháng bắt đầu từ 0
+                            const year = date.getFullYear();
+                            return `${day}-${month}-${year}`;
+                        }
+                        return "N/A";
+                    },
+                },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        return `
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id}">
+                                Xóa
+                            </button>
+                        `;
+                    },
+                    "orderable": false, // Không sắp xếp cho cột này
+                    "searchable": false // Không tìm kiếm cho cột này
+                }
+            ],
+            "language": {
+                "lengthMenu": "Hiển thị _MENU_ bản ghi mỗi trang",
+                "zeroRecords": "Không tìm thấy dữ liệu",
+                "info": "Hiển thị trang _PAGE_ trên _PAGES_",
+                "infoEmpty": "Không có bản ghi nào",
+                "infoFiltered": "(lọc từ _MAX_ bản ghi)",
+                "search": "Tìm kiếm:",
+                "paginate": {
+                    "previous": "Trước",
+                    "next": "Sau"
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

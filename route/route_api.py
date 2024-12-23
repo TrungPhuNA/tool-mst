@@ -152,3 +152,69 @@ def get_tax_all():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+
+@bp.route("/api/get-users", methods=["POST"])
+def api_get_users():
+    try:
+        # Lấy dữ liệu JSON từ body
+        data = request.get_json()
+        draw = int(data.get("draw", 1))  # Số lần gửi request
+        start = int(data.get("start", 0))  # Bản ghi bắt đầu
+        length = int(data.get("length", 10))  # Số bản ghi trên mỗi trang
+        search_value = data.get("search", {}).get("value", "").strip()  # Giá trị tìm kiếm
+
+        # Kết nối database
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Lấy tổng số bản ghi
+        cursor.execute("SELECT COUNT(*) as total FROM users")
+        total_records = cursor.fetchone()["total"]
+
+        # Lọc dữ liệu nếu có giá trị tìm kiếm
+        if search_value:
+            query = """
+                SELECT * FROM users
+                WHERE username LIKE %s OR email LIKE %s
+                ORDER BY id DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (f"%{search_value}%", f"%{search_value}%", length, start)
+            cursor.execute(query, params)
+
+            # Lấy tổng số bản ghi sau khi lọc
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM users
+                WHERE username LIKE %s OR email LIKE %s 
+            """, (f"%{search_value}%", f"%{search_value}%"))
+            total_filtered = cursor.fetchone()["total"]
+        else:
+            query = """
+                SELECT * FROM users
+                ORDER BY id DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (length, start)
+            cursor.execute(query, params)
+
+            # Tổng số bản ghi sau khi lọc là tổng số bản ghi ban đầu
+            total_filtered = total_records
+
+        records = cursor.fetchall()
+
+        # Đóng kết nối
+        cursor.close()
+        connection.close()
+
+        # Chuẩn bị JSON trả về cho DataTables
+        return jsonify({
+            "draw": draw,
+            "recordsTotal": total_records,  # Tổng số bản ghi trong database
+            "recordsFiltered": total_filtered,  # Tổng số bản ghi sau khi lọc (nếu có)
+            "data": records  # Dữ liệu trả về
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+

@@ -162,7 +162,6 @@ def crawlerList(url):
 
     try:
         driver.get(url)
-        time.sleep(3)
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, "tax-listing"))
         )
@@ -182,6 +181,7 @@ def crawlerList(url):
             href = mst_link['href']
             if href.startswith("/"):  # Chỉ lấy link nội bộ
                 full_link = "https://masothue.com" + href
+                print("==== Link crawler: ", full_link)
                 links.append(full_link)
 
     return links
