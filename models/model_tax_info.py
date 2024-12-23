@@ -22,23 +22,6 @@ def save_to_db(data):
     connection = get_db_connection()
     cursor = connection.cursor()
 
-    # Tạo bảng nếu chưa có
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tax_info (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            tax_id VARCHAR(50) UNIQUE,
-            name VARCHAR(255) NULL,
-            address TEXT NULL,
-            status VARCHAR(255) NULL,
-            representative VARCHAR(255) NULL,
-            international_name VARCHAR(255) NULL,
-            management VARCHAR(255) NULL,
-            active_date DATE NULL,
-            param_search VARCHAR(255) NULL,
-            source_url TEXT NULL
-        )
-    """)
-
     # Kiểm tra nếu tax_id đã tồn tại trong DB
     cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (data['id'],))
     result = cursor.fetchone()
@@ -58,8 +41,8 @@ def save_to_db(data):
 
         # Chèn dữ liệu mới
         cursor.execute("""
-            INSERT INTO tax_info (tax_id, name, address, status, representative, management, active_date, source_url, international_name, param_search)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO tax_info (tax_id, name, address, status, representative, management, active_date, source_url, international_name, param_search, duration_process)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data['id'],
             data['name'],
@@ -70,7 +53,8 @@ def save_to_db(data):
             active_date,
             data['source_url'],
             data['internationalName'],
-            data['param_search']
+            data['param_search'],
+            data['duration']
         ))
 
         connection.commit()

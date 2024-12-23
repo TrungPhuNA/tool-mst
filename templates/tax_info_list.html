@@ -36,6 +36,7 @@
                         <th>Địa chỉ</th>
                         <th>Trạng thái</th>
                         <th>Hoạt động</th>
+                        <th>Time</th>
                         <th>Crawler</th>
                     </tr>
                 </thead>
@@ -89,6 +90,12 @@
                         return "N/A"; // Giá trị mặc định nếu không có ngày
                     },
                     "width": "10%"
+                },
+                {
+                    "data": "duration_process",
+                    "render": function(data, type, row) {
+                        return data +  " s";
+                    }
                 },
                 { "data": "crawler_status" }
             ],

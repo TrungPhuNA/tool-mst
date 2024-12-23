@@ -3,13 +3,14 @@ from tool.crawler import crawl_masothue
 from models.model_tax_info import save_to_db, get_db_connection, save_data_error_to_db, update_crawler_status
 import traceback
 import math
+import time
 
 # Tạo Blueprint cho các route
 bp = Blueprint('route_api', __name__)
 
 @bp.route("/api/get-tax-info", methods=["GET"])
 def get_tax_info():
-    # Lấy tham số từ request
+    start_time = time.time()
     param = request.args.get("param")
     print("============ param: ", param)
     if not param:
@@ -58,7 +59,10 @@ def get_tax_info():
             "data": {}
         }), 500
 
+    end_time = time.time()
+    duration = end_time - start_time
     if result["code"] == "00":
+        result["data"]["duration"] = duration
         save_to_db(result["data"])  # Chèn vào DB
         update_crawler_status(param, 'success')  # Cập nhật trạng thái thành công
 
