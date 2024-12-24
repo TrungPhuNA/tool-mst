@@ -25,7 +25,7 @@ Hoạc cập nhật tay = pkill -HUP gunicorn
 #Docker
 ``` 
 RUN => docker-compose up -d
-Kd lại docker => docker-compose down
+Kd lại docker => docker-compose down || docker compose down
 Xem logs => docker logs selenium-hub
 RUn theo file => docker-compose -f docker-compose_v2.yml up -d
 ```
