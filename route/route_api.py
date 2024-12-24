@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 from tool.crawler import crawl_masothue
 from models.model_tax_info import save_to_db, get_db_connection, save_data_error_to_db, update_crawler_status
+from models.model_callback import CallbackInfo
 import traceback
 import math
 import time
@@ -222,3 +223,118 @@ def api_get_users():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+
+
+# Lấy danh sách callbacks
+@bp.route("/api/callbacks", methods=["GET"])
+def get_callbacks():
+    callbacks = CallbackInfo.get_all()
+    return jsonify(callbacks)
+
+# Thêm callbacks
+@bp.route("/api/callbacks", methods=["POST"])
+def add_callback():
+    data = request.json
+    url = data.get("url")
+    method = data.get("method", "POST")
+    auth_key = data.get("auth_key")
+    user_id = data.get("user_id")
+    additional_info = data.get("additional_info")
+
+    if not url or not auth_key or not user_id:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    callback_id = CallbackInfo.create(url, method, auth_key, user_id, additional_info)
+    return jsonify({"message": "Callback created", "id": callback_id}), 201
+
+# Sửa callbacks
+@bp.route("/api/callbacks/<int:callback_id>", methods=["PUT"])
+def update_callback(callback_id):
+    data = request.json
+    url = data.get("url")
+    method = data.get("method", "POST")
+    auth_key = data.get("auth_key")
+    user_id = data.get("user_id")
+    additional_info = data.get("additional_info")
+
+    if not url or not auth_key or not user_id:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    CallbackInfo.update(callback_id, url, method, auth_key, user_id, additional_info)
+    return jsonify({"message": "Callback updated"}), 200
+
+# Xóa callbacks
+@bp.route("/api/delete-callback/<int:callback_id>", methods=["DELETE"])
+def delete_callback(callback_id):
+    from models.model_callback import CallbackInfo
+    try:
+        CallbackInfo.delete(callback_id)
+        return jsonify({"message": "Callback đã được xóa thành công"}), 200
+    except Exception as e:
+        return jsonify({"message": "Đã xảy ra lỗi khi xóa callback", "error": str(e)}), 500
+
+
+@bp.route("/api/get-callbacks", methods=["POST"])
+def api_get_callbacks():
+    try:
+        # Lấy dữ liệu JSON từ body
+        data = request.get_json()
+        draw = int(data.get("draw", 1))  # Số lần gửi request
+        start = int(data.get("start", 0))  # Bản ghi bắt đầu
+        length = int(data.get("length", 10))  # Số bản ghi trên mỗi trang
+        search_value = data.get("search", {}).get("value", "").strip()  # Giá trị tìm kiếm
+
+        # Kết nối database
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Lấy tổng số bản ghi
+        cursor.execute("SELECT COUNT(*) as total FROM callback_info")
+        total_records = cursor.fetchone()["total"]
+
+        # Lọc dữ liệu nếu có giá trị tìm kiếm
+        if search_value:
+            query = """
+                SELECT * FROM callback_info
+                WHERE username LIKE %s OR email LIKE %s
+                ORDER BY id DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (f"%{search_value}%", f"%{search_value}%", length, start)
+            cursor.execute(query, params)
+
+            # Lấy tổng số bản ghi sau khi lọc
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM callback_info
+                WHERE username LIKE %s OR email LIKE %s 
+            """, (f"%{search_value}%", f"%{search_value}%"))
+            total_filtered = cursor.fetchone()["total"]
+        else:
+            query = """
+                SELECT * FROM callback_info
+                ORDER BY id DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (length, start)
+            cursor.execute(query, params)
+
+            # Tổng số bản ghi sau khi lọc là tổng số bản ghi ban đầu
+            total_filtered = total_records
+
+        records = cursor.fetchall()
+
+        # Đóng kết nối
+        cursor.close()
+        connection.close()
+
+        # Chuẩn bị JSON trả về cho DataTables
+        return jsonify({
+            "draw": draw,
+            "recordsTotal": total_records,  # Tổng số bản ghi trong database
+            "recordsFiltered": total_filtered,  # Tổng số bản ghi sau khi lọc (nếu có)
+            "data": records  # Dữ liệu trả về
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500

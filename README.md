@@ -24,7 +24,7 @@ Hoạc cập nhật tay = pkill -HUP gunicorn
 
 #Docker
 ``` 
-RUN => docker-compose up -d
+RUN => docker-compose up -d || docker compose up -d
 Kd lại docker => docker-compose down || docker compose down
 Xem logs => docker logs selenium-hub
 RUn theo file => docker-compose -f docker-compose_v2.yml up -d
@@ -51,4 +51,22 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE callback_info (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    url VARCHAR(255) NOT NULL,
+    method ENUM('GET', 'POST', 'PUT', 'DELETE') DEFAULT 'POST',
+    auth_key VARCHAR(255) NOT NULL,
+    user_id INT NULL,
+    additional_info TEXT,
+    headers JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+## Luồng mới
+``` 
+     status ENUM('pending', 'processing', 'success', 'error')
 ```

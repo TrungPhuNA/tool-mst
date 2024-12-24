@@ -1,0 +1,70 @@
+{% extends "layouts/app_master.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Thêm Callback</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="url" class="form-label">URL</label>
+            <input type="text" class="form-control" id="url" name="url" value="{{ callback.url }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="method" class="form-label">Method</label>
+            <select class="form-control" id="method" name="method">
+                <option value="POST" {% if callback.method == "POST" %}selected{% endif %}>POST</option>
+                <option value="GET" {% if callback.method == "GET" %}selected{% endif %}>GET</option>
+                <option value="PUT" {% if callback.method == "PUT" %}selected{% endif %}>PUT</option>
+                <option value="DELETE" {% if callback.method == "DELETE" %}selected{% endif %}>DELETE</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="auth_key" class="form-label">Auth Key</label>
+            <input type="text" class="form-control" id="auth_key" name="auth_key" value="{{ callback.auth_key }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="user_id" class="form-label">User</label>
+            <input type="number" class="form-control" id="user_id" name="user_id" value="{{ callback.user_id }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="additional_info" class="form-label">Additional Info</label>
+            <textarea class="form-control" id="additional_info" name="additional_info">{{ callback.additional_info }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="headers" class="form-label">Headers</label>
+            <div id="headers-container">
+                {% for key, value in callback.headers.items() %}
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" name="header_keys[]" placeholder="Header Key" value="{{ key }}">
+                    <input type="text" class="form-control" name="header_values[]" placeholder="Header Value" value="{{ value }}">
+                    <button type="button" class="btn btn-danger remove-header">Xóa</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-header" class="btn btn-secondary">Thêm Header</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a href="{{ url_for('route_web.manage_callbacks') }}" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    document.getElementById("add-header").addEventListener("click", function () {
+        const container = document.getElementById("headers-container");
+        const headerInput = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="header_keys[]" placeholder="Header Key">
+                <input type="text" class="form-control" name="header_values[]" placeholder="Header Value">
+                <button type="button" class="btn btn-danger remove-header">Xóa</button>
+            </div>`;
+        container.insertAdjacentHTML("beforeend", headerInput);
+
+        container.querySelectorAll(".remove-header").forEach(btn => {
+            btn.addEventListener("click", function () {
+                this.parentElement.remove();
+            });
+        });
+    });
+</script>
+{% endblock %}

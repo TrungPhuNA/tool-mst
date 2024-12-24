@@ -31,7 +31,6 @@ class User(UserMixin):
                 sql = "SELECT id, username, email FROM users"
                 cursor.execute(sql)
                 result = cursor.fetchall()  # Trả về danh sách dict
-                print('============ result: ', result)
                 columns = [col[0] for col in cursor.description]
                 result_as_dict = [dict(zip(columns, row)) for row in result]
                 return [User.from_dict(row) for row in result_as_dict]
