@@ -16,8 +16,107 @@ def get_db_connection():
     )
     return connection
 
-
 def save_to_db(data):
+    print("============== DATA SAVE DB =========== ", data)
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Kiểm tra nếu tax_id đã tồn tại trong DB
+        cursor.execute("SELECT * FROM tax_info WHERE tax_id = %s", (data['id'],))
+        result = cursor.fetchone()
+
+        # Xử lý active_date
+        active_date = data.get('activeDate', '').strip()
+        if not active_date:
+            active_date = None
+
+        if result:
+            print("Data already exists in DB, updating:", result)
+
+            # Cập nhật dữ liệu nếu đã tồn tại
+            cursor.execute("""
+                UPDATE tax_info
+                SET name = %s,
+                    address = %s,
+                    status = %s,
+                    representative = %s,
+                    management = %s,
+                    active_date = %s,
+                    source_url = %s,
+                    international_name = %s,
+                    param_search = %s,
+                    duration_process = %s
+                WHERE tax_id = %s
+            """, (
+                data['name'],
+                data['address'],
+                data['status'],
+                data['representative'],
+                data['management'],
+                active_date,
+                data['source_url'],
+                data['internationalName'],
+                data['param_search'],
+                data['duration'],
+                data['id']
+            ))
+
+            connection.commit()
+
+            # Trả về dữ liệu sau khi cập nhật
+            updated_data = {
+                "tax_info_id": result[0],  # Lấy ID từ bản ghi cũ
+                "id": data['id'],
+                "name": data['name'],
+                "address": data['address'],
+                "status": data['status'],
+                "representative": data['representative'],
+                "management": data['management'],
+                "activeDate": active_date,
+                "source_url": data['source_url'],
+                "internationalName": data['internationalName'],
+                "param_search": data['param_search'],
+                "duration": data['duration']
+            }
+            return updated_data
+
+        # Nếu không tồn tại, chèn dữ liệu mới
+        print("Data does not exist, inserting new data")
+
+        cursor.execute("""
+            INSERT INTO tax_info (tax_id, name, address, status, representative, management, active_date, source_url, international_name, param_search, duration_process)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            data['id'],
+            data['name'],
+            data['address'],
+            data['status'],
+            data['representative'],
+            data['management'],
+            active_date,
+            data['source_url'],
+            data['internationalName'],
+            data['param_search'],
+            data['duration']
+        ))
+
+        connection.commit()
+        print("Data inserted into DB successfully!")
+
+        # Trả về dữ liệu vừa được chèn
+        data["tax_info_id"] = cursor.lastrowid
+        return data
+    except Exception as e:
+        print(f"Error during INSERT/UPDATE: {e}")
+        traceback.print_exc()
+        raise
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def save_to_db_v1(data):
     print("============== DATA SAVE DB =========== ", data)
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -59,6 +158,7 @@ def save_to_db(data):
 
         connection.commit()
         print("Data inserted into DB successfully!")
+        data["tax_info_id"] = cursor.lastrowid
         return data  # Trả về dữ liệu vừa được chèn
     except Exception as e:
         print(f"Error during INSERT: {e}")

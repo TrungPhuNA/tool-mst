@@ -16,4 +16,13 @@ docker compose up -d
 
 # Kiểm tra trạng thái
 docker ps
+
+# Don dẹp chrome
+docker exec -it chrome bash
+ps aux
+docker stop chrome
+docker start chrome
+
+# Theo dõi tài nguyên có đc giải phóng không  
+docker stats
 ```

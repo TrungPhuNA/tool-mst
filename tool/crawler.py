@@ -64,6 +64,7 @@ def crawl_masothue(query):
 
         # Dừng luôn nếu modal đã hiển thị
         if is_modal_shown:
+            driver.quit()
             return
 
         # Nếu không có modal => tiếp tục redirect
@@ -95,6 +96,7 @@ def crawl_masothue(query):
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
+        driver.quit()
         return None
 
     finally:
@@ -151,7 +153,7 @@ def initDriveProd():
 
 def initDriveLocal():
     options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=800,600")  # Chiều rộng 600px, chiều cao 800px
+    options.add_argument("--window-size=1200,800")  # Chiều rộng 600px, chiều cao 800px
     options.add_argument("--disable-extensions")  # Tắt các extension
     driver = webdriver.Chrome(options=options)
     return driver

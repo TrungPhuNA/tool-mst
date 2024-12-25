@@ -64,9 +64,27 @@ CREATE TABLE callback_info (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE tax_request_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    param VARCHAR(50) NOT NULL,
+    callback_id INT NULL,
+    tax_info_id INT NULL,
+    tax_request_log VARCHAR(50) NULL,
+    crawler_status ENUM('init', 'retry', 'success', 'error') DEFAULT 'init',
+    retry_time DATETIME NULL,
+    duration_process FLOAT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (callback_id) REFERENCES callback_info(id) ON DELETE CASCADE
+);
+
 ```
 
 ## Luồng mới
 ``` 
      status ENUM('pending', 'processing', 'success', 'error')
+     pip install requests
+     
+     http://127.0.0.1:5000/api/v2/get-tax-info?param=0110914599&auth_key=phuphan&request_id=12121
 ```
