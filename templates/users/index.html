@@ -1,7 +1,10 @@
 {% extends "layouts/app_master.html" %}
 {% block content %}
 <div class="container mt-4">
-        <h1 class="mb-4">Danh sách thành viên</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-4">Danh sách thành viên</h1>
+            <a href="/register" class="btn btn-primary mb-4">Thêm tài khoản</a>
+        </div>
         <!-- Bảng dữ liệu -->
         <div class="row">
             <table id="tax-table" class="table table-striped">

@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template, session, redirect, url_fo
 from flask_bcrypt import Bcrypt
 from models.connect_db import db_connection
 from models.model_user import User
-from flask_login import login_user
+from flask_login import login_user, login_required
 
 bcrypt = Bcrypt()  # Sử dụng bcrypt
 
@@ -33,6 +33,7 @@ def login():
 
 
 @bp.route("/register", methods=["GET", "POST"])
+@login_required
 def register():
     if request.method == "POST":
         username = request.form.get("username")
