@@ -64,7 +64,6 @@ def crawl_masothue(query):
 
         # Dừng luôn nếu modal đã hiển thị
         if is_modal_shown:
-            driver.quit()
             return
 
         # Nếu không có modal => tiếp tục redirect
@@ -96,7 +95,6 @@ def crawl_masothue(query):
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
-        driver.quit()
         return None
 
     finally:
