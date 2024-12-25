@@ -1,14 +1,10 @@
+#version: "3"
 services:
   selenium-hub:
     image: selenium/hub:4.13.0
     container_name: selenium-hub
     ports:
       - "4444:4444"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"    # Giới hạn 50% của 1 CPU
-          memory: "256M" # Giới hạn 256MB RAM
 
   chrome:
     image: selenium/node-chrome:4.13.0
@@ -20,8 +16,14 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-    deploy:
-      resources:
-        limits:
-          cpus: "1"      # Giới hạn sử dụng tối đa 1 CPU core
-          memory: "512M" # Giới hạn 512MB RAM
+
+#  firefox:
+#    image: selenium/node-firefox:4.13.0
+#    container_name: firefox
+#    shm_size: 1gb
+#    depends_on:
+#      - selenium-hub
+#    environment:
+#      - SE_EVENT_BUS_HOST=selenium-hub
+#      - SE_EVENT_BUS_PUBLISH_PORT=4442
+#      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
