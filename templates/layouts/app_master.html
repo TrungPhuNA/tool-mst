@@ -56,7 +56,10 @@
                             <a class="nav-link {% if request.path.startswith('/users') %}active{% endif %}" href="/users">Thành viên</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path.startswith('/callbacks') %}active{% endif %}" href="/callbacks">Callback</a>
+                            <a class="nav-link {% if request.path.startswith('/setup-post-back') %}active{% endif %}" href="/setup-post-back">Setup Postback</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path.startswith('/logs/post-back') %}active{% endif %}" href="/logs/post-back">Postback</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link">Xin chào, {{ session.get("username") }}</a>

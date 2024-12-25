@@ -32,7 +32,17 @@ def get_lists_users():
         traceback.print_exc()
         return f"An error occurred: {e}", 500
 
-@bp.route("/callbacks", methods=["GET"])
+@bp.route("/logs/post-back", methods=["GET"])
+@login_required
+def get_lists_log_postback():
+    try:
+        users = User.get_all_users()
+        return render_template("logs/post_back.html",users=users)
+    except Exception as e:
+        traceback.print_exc()
+        return f"An error occurred: {e}", 500
+
+@bp.route("/setup-post-back", methods=["GET"])
 def manage_callbacks():
     callbacks = CallbackInfo.get_all()
     return render_template("callbacks/index.html", callbacks=callbacks)
