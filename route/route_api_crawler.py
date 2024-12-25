@@ -40,6 +40,7 @@ def get_tax_info_v2():
 
     if request_log:
         if request_log['crawler_status'] in ['init', 'retry']:
+            threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
             return jsonify({
                 "code": "99",
                 "desc": "Crawler is still processing, please try again later",
