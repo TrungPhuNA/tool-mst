@@ -78,7 +78,7 @@ def get_tax_info_v2():
     cursor.close()
 
     # Gửi crawler xử lý bất đồng bộ
-    threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
+    threading.Thread(target=process_crawler_request, args=(param, request_id, callback_info)).start()
 
     return jsonify({
         "code": "01",
@@ -87,7 +87,7 @@ def get_tax_info_v2():
         "request_id": request_id  # Bao gồm request_id trong phản hồi
     }), 202
 
-def process_crawler_request(param, request_id):
+def process_crawler_request(param, request_id, callback_info):
     print("============= process_crawler_request ======= ", param, request_id)
     start_time = time.time()
     connection = get_db_connection()
@@ -111,20 +111,23 @@ def process_crawler_request(param, request_id):
         )
 
         # Gửi postback
-        cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
-        callback_info = cursor.fetchone()
-        if callback_info:
-            send_postback_success(param, request_id, result["data"], callback_info)
+        # cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
+        # callback_info = cursor.fetchone()
+        # if callback_info:
+        #     send_postback_success(param, request_id, result["data"], callback_info)
+        send_postback_success(param, request_id, result["data"], callback_info)
     else:
         # Xử lý lỗi và cập nhật trạng thái
         cursor.execute(
             "UPDATE tax_request_log SET crawler_status = 'error', retry_time = NOW() + INTERVAL 1 HOUR WHERE param = %s AND request_id = %s",
             (param, request_id)
         )
-        cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
-        callback_info = cursor.fetchone()
-        if callback_info:
-            send_postback_error(param, request_id, callback_info)
+        # cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
+        # callback_info = cursor.fetchone()
+        # if callback_info:
+        #     send_postback_error(param, request_id, callback_info)
+
+        send_postback_error(param, request_id, callback_info)
 
     connection.commit()
     cursor.close()
