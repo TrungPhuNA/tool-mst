@@ -1,8 +1,11 @@
-from flask import Blueprint, request, render_template, session, redirect, url_for
+from flask import Blueprint, request, render_template, session, redirect, url_for, current_app
 from flask_bcrypt import Bcrypt
 from models.connect_db import db_connection
 from models.model_user import User
 from flask_login import login_user, login_required
+import threading
+from flask_mail import Mail, Message
+from app import mail
 
 bcrypt = Bcrypt()  # Sử dụng bcrypt
 
@@ -53,7 +56,9 @@ def register():
         connection.commit()
         connection.close()
 
-        return redirect(url_for("route_auth.login"))
+        send_welcome_email(email, username)
+
+        return redirect(url_for("route_web.tax_info_list"))
 
     return render_template("register.html")
 
@@ -62,3 +67,45 @@ def register():
 def logout():
     session.clear()  # Xóa toàn bộ session
     return redirect(url_for("route_auth.login"))
+
+
+def send_welcome_email(email, username):
+    """
+    Gửi email chào mừng đến người dùng một cách bất đồng bộ.
+    """
+    login_url = "http://mst.s-notification.com/login"
+    subject = "Welcome to Our App!"
+    body_html = f"""
+        <html>
+        <body>
+            <p>Hi {username},</p>
+            <p>Thank you for registering with our app. We're excited to have you onboard!</p>
+            <p>
+                Click the link below to log in to your account:
+                <br>
+                <a href="{login_url}" target="_blank">Login to Your Account</a>
+            </p>
+            <p>If you have any questions, feel free to reach out to us.</p>
+            <p>Best regards,<br>The Team</p>
+        </body>
+        </html>
+    """
+
+    # Tạo message
+    msg = Message(subject, recipients=[email])
+    msg.html = body_html  # Sử dụng nội dung HTML
+
+    # Tạo luồng riêng để gửi email
+    thread = threading.Thread(target=send_email_thread, args=(current_app._get_current_object(), msg))
+    thread.start()
+
+def send_email_thread(app, msg):
+    """
+    Hàm chạy trong luồng để gửi email.
+    """
+    with app.app_context():
+        try:
+            mail.send(msg)
+            print(f"Email sent to {msg.recipients[0]}")
+        except Exception as e:
+            print(f"Failed to send email to {msg.recipients[0]}: {e}")

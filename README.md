@@ -40,51 +40,8 @@ brew install --cask tigervnc-viewer
 Danh sách => http://mst.s-notification.com/tax-info-list
 Tìm kiếm => http://127.0.0.1:5000?param=040094022488
 
-## Login
+## Send email
 ``` 
-pip install flask-bcrypt flask-login
+pip install Flask-Mail
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE callback_info (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    url VARCHAR(255) NOT NULL,
-    method ENUM('GET', 'POST', 'PUT', 'DELETE') DEFAULT 'POST',
-    auth_key VARCHAR(255) NOT NULL,
-    user_id INT NULL,
-    additional_info TEXT,
-    headers JSON NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE tax_request_log (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    param VARCHAR(50) NOT NULL,
-    callback_id INT NULL,
-    tax_info_id INT NULL,
-    tax_request_log VARCHAR(50) NULL,
-    crawler_status ENUM('init', 'retry', 'success', 'error') DEFAULT 'init',
-    retry_time DATETIME NULL,
-    duration_process FLOAT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (callback_id) REFERENCES callback_info(id) ON DELETE CASCADE
-);
-
-```
-
-## Luồng mới
-``` 
-     status ENUM('pending', 'processing', 'success', 'error')
-     pip install requests
-     
-     http://127.0.0.1:5000/api/v2/get-tax-info?param=0110914599&auth_key=phuphan&request_id=12121
 ```
