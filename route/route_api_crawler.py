@@ -87,7 +87,7 @@ def get_tax_info_v2():
         connection.close()
 
 @bp.route("/api/v2/get-tax-info-backup", methods=["GET"])
-def get_tax_info_v2():
+def get_tax_info_v2_bup():
     """
     API để lấy thông tin mã số thuế (tax info) với `auth_key` và `request_id`.
     """
