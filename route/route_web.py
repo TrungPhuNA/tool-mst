@@ -44,7 +44,7 @@ def view_logs_table(log_type):
     """Hiển thị bảng log."""
     if log_type not in LOG_FILES:
         return "Log type không hợp lệ!", 400
-    return render_template("logs_table.html", log_type=log_type)
+    return render_template("logs/log_view.html", log_type=log_type)
 
 
 @bp.route("/", methods=["GET"])
