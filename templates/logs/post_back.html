@@ -1,30 +1,30 @@
 {% extends "layouts/app_master.html" %}
 {% block content %}
 <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="mb-4">Danh sách</h1>
-        </div>
-        <!-- Bảng dữ liệu -->
-        <div class="row">
-            <table id="tax-table" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Param</th>
-                        <th>Request Id</th>
-                        <th>Tax Info Id</th>
-                        <th>Postback Id</th>
-                        <th>Crawler Status</th>
-                        <th>Postback Status</th>
-                        <th>Duration Process</th>
-                        <th>Create</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-4">Danh sách</h1>
     </div>
+    <!-- Bảng dữ liệu -->
+    <div class="row">
+        <table id="tax-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Param</th>
+                    <th>Request Id</th>
+                    <th>Tax Info Id</th>
+                    <th>Postback Id</th>
+                    <th>Crawler Status</th>
+                    <th>Postback Status</th>
+                    <th>Duration Process</th>
+                    <th>Create</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
 <div id="loading-overlay" class="d-none">
     <div class="spinner-border text-primary" role="status">
@@ -40,7 +40,7 @@
 <script>
     $(document).ready(function () {
         // Khởi tạo DataTable
-        $('#tax-table').DataTable({
+        const table = $('#tax-table').DataTable({
             "processing": true,
             "serverSide": true,
             "ajax": {
@@ -57,12 +57,49 @@
                 { "data": "request_id" },
                 { "data": "tax_info_id" },
                 { "data": "callback_id" },
-                { "data": "crawler_status" },
-                { "data": "postback_status" },
+                {
+                    "data": "crawler_status",
+                    "render": function(data) {
+                        let labelClass = '';
+                        switch (data) {
+                            case 'init':
+                                labelClass = 'badge bg-secondary';
+                                break;
+                            case 'retry':
+                                labelClass = 'badge bg-warning';
+                                break;
+                            case 'success':
+                                labelClass = 'badge bg-success';
+                                break;
+                            case 'error':
+                                labelClass = 'badge bg-danger';
+                                break;
+                        }
+                        return `<span class="${labelClass}">${data}</span>`;
+                    }
+                },
+                {
+                    "data": "postback_status",
+                    "render": function(data) {
+                        let labelClass = '';
+                        switch (data) {
+                            case 'pending':
+                                labelClass = 'badge bg-secondary';
+                                break;
+                            case 'success':
+                                labelClass = 'badge bg-success';
+                                break;
+                            case 'error':
+                                labelClass = 'badge bg-danger';
+                                break;
+                        }
+                        return `<span class="${labelClass}">${data}</span>`;
+                    }
+                },
                 { "data": "duration_process" },
                 {
                     "data": "created_at",
-                    "render": function(data, type, row) {
+                    "render": function(data) {
                         if (data) {
                             const date = new Date(data);
                             const day = date.getDate().toString().padStart(2, '0');
@@ -71,20 +108,26 @@
                             return `${day}-${month}-${year}`;
                         }
                         return "N/A";
-                    },
+                    }
                 },
                 {
                     "data": null,
                     "render": function (data, type, row) {
                         return `
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id}">
-                                Xóa
-                            </button>
+                            <div class="d-inline-flex align-items-center">
+                                <button class="btn btn-danger btn-sm delete-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.3rem 0.5rem; font-size: 10px; margin-right: 5px;">
+                                    <i class="fa-solid fa-trash-alt" style="margin-right: 5px"></i> Xóa
+                                </button>
+                                ${row.postback_status === 'pending' || row.postback_status === 'error' ? `
+                                <button class="btn btn-primary btn-sm resend-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.3rem 0.5rem; font-size: 10px;">
+                                    <i class="fa-solid fa-paper-plane" style="margin-right: 5px"></i> Bắn lại
+                                </button>` : ''}
+                            </div>
                         `;
                     },
-                    "orderable": false, // Không sắp xếp cho cột này
-                    "searchable": false // Không tìm kiếm cho cột này
-                }
+                    "orderable": false,
+                    "searchable": false
+                },
             ],
             "language": {
                 "lengthMenu": "Hiển thị _MENU_ bản ghi mỗi trang",
@@ -97,6 +140,23 @@
                     "previous": "Trước",
                     "next": "Sau"
                 }
+            }
+        });
+
+        // Xử lý sự kiện xóa
+        $('#tax-table').on('click', '.delete-btn', function () {
+            const id = $(this).data('id');
+            if (confirm('Bạn có chắc chắn muốn xóa mục này?')) {
+                $.ajax({
+                    url: `/api/post-backs/${id}`,
+                    type: 'DELETE',
+                    success: function (response) {
+                        table.ajax.reload();
+                    },
+                    error: function () {
+                        alert('Xóa thất bại, vui lòng thử lại.');
+                    }
+                });
             }
         });
     });

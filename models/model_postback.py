@@ -24,3 +24,14 @@ class ModelPostBack:
         finally:
             connection.close()
 
+    @staticmethod
+    def delete(post_back_id):
+        connection = db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = "DELETE FROM tax_request_log WHERE id = %s"
+                cursor.execute(sql, (post_back_id,))
+                connection.commit()
+        finally:
+            connection.close()
+

@@ -85,6 +85,7 @@ def require_login():
 
 # Bật chế độ debug tự động load lại khi thay đổi code
 app.config['DEBUG'] = True
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 if __name__ == "__main__":
     app.run(debug=True)

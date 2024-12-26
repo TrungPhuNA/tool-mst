@@ -42,10 +42,3 @@ brew install --cask tigervnc-viewer
 #
 Danh sách => http://mst.s-notification.com/tax-info-list
 Tìm kiếm => http://127.0.0.1:5000?param=040094022488
-
-## Send email
-``` 
-pip install Flask-Mail
-ALTER TABLE tax_request_log ADD COLUMN postback_status ENUM('pending', 'success', 'error') DEFAULT 'pending';
-
-```

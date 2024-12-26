@@ -338,6 +338,7 @@ def api_get_callbacks():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+
 @bp.route("/api/post-backs", methods=["POST"])
 def api_post_postbacks():
     try:
@@ -402,3 +403,12 @@ def api_post_postbacks():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+@bp.route("/api/post-backs/<int:post_back_id>", methods=["DELETE"])
+def api_delete_post_backs(post_back_id):
+    from models.model_postback import ModelPostBack
+    try:
+        ModelPostBack.delete(post_back_id)
+        return jsonify({"message": "Postback đã được xóa thành công"}), 200
+    except Exception as e:
+        return jsonify({"message": "Đã xảy ra lỗi khi xóa Postback", "error": str(e)}), 500
