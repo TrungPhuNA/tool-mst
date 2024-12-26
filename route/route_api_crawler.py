@@ -37,7 +37,7 @@ def get_tax_info_v2():
             cursor.execute("SELECT * FROM tax_request_log WHERE param = %s AND request_id = %s", (param, request_id))
             request_log = cursor.fetchone()
             if request_log:
-                if request_log['crawler_status'] in ['init', 'retry']:
+                if request_log['crawler_status'] in ['init', 'retry','error']:
                     threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
                     return jsonify({
                         "code": "99",
@@ -65,13 +65,6 @@ def get_tax_info_v2():
                         },
                         "request_id": request_id
                     }), 200
-
-                return jsonify({
-                    "code": "99",
-                    "desc": "Crawler is error, please try again later",
-                    "data": {},
-                    "request_id": request_id
-                }), 202
 
 
         with connection.cursor(dictionary=True) as cursor:
