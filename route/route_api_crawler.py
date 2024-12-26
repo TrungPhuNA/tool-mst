@@ -191,8 +191,15 @@ def send_postback(callback_info, payload, method="POST"):
         method (str): Phương thức HTTP (POST, PUT, GET, DELETE). Mặc định là POST.
     """
     url = callback_info['url']
-    headers = json.loads(callback_info['headers']) if callback_info['headers'] else {}
+    # headers = json.loads(callback_info['headers']) if callback_info['headers'] else {}
     auth_key = callback_info['auth_key']
+
+    raw_headers = callback_info.get('headers', '{}')
+    try:
+        headers = json.loads(raw_headers) if raw_headers else {}
+    except json.JSONDecodeError:
+        print("Invalid headers format. Using empty headers.")
+        headers = {}
 
     # Thêm Authorization header nếu có auth_key
     if auth_key:
