@@ -201,6 +201,13 @@ def send_postback(callback_info, payload, method="POST"):
         print("Invalid headers format. Using empty headers.")
         headers = {}
 
+    # Xóa khoảng trắng hoặc ký tự không hợp lệ trong header keys và values
+    sanitized_headers = {
+        str(key).strip(): str(value).strip()
+        for key, value in headers.items()
+        if key and value
+    }
+
     # Thêm Authorization header nếu có auth_key
     if auth_key:
         headers['Authorization'] = f"Bearer {auth_key}"
@@ -208,13 +215,13 @@ def send_postback(callback_info, payload, method="POST"):
     try:
         # Gửi request dựa trên phương thức HTTP
         if method == "POST":
-            response = requests.post(url, json=payload, headers=headers)
+            response = requests.post(url, json=payload, headers=sanitized_headers)
         elif method == "PUT":
-            response = requests.put(url, json=payload, headers=headers)
+            response = requests.put(url, json=payload, headers=sanitized_headers)
         elif method == "GET":
-            response = requests.get(url, params=payload, headers=headers)
+            response = requests.get(url, params=payload, headers=sanitized_headers)
         elif method == "DELETE":
-            response = requests.delete(url, json=payload, headers=headers)
+            response = requests.delete(url, json=payload, headers=sanitized_headers)
         else:
             print(f"Unsupported HTTP method: {method}")
             return False
@@ -223,6 +230,6 @@ def send_postback(callback_info, payload, method="POST"):
         return response.status_code == 200
     except requests.exceptions.RequestException as e:
         print("======== data payload post back: ", payload)
-        print("======== data header post back: ", headers)
+        print("======== data header post back: ", sanitized_headers)
         print(f"Error sending postback: {e}")
         return False
