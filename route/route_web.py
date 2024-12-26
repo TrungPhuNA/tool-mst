@@ -17,26 +17,35 @@ LOG_FILES = {
     "gunicorn_error": "gunicorn_error.log"
 }
 
-@bp.route("/logs/<log_type>")
-@login_required
-def get_logs(log_type):
-    """API đọc log từ các file cụ thể."""
+@bp.route("/logs/table/<log_type>")
+def logs_table(log_type):
+    """API hiển thị log dưới dạng JSON."""
     if log_type not in LOG_FILES:
         return jsonify({"error": "Invalid log type"}), 400
 
     log_path = LOG_FILES[log_type]
 
-    # Kiểm tra file log tồn tại
     if not os.path.exists(log_path):
         return jsonify({"error": f"Log file '{log_path}' not found"}), 404
 
     try:
         with open(log_path, "r", encoding="utf-8") as log_file:
-            # Đọc nội dung file
-            content = log_file.readlines()[-100:]  # Lấy 100 dòng cuối
-            return render_template("logs/log_view.html", log_type=log_type, content=content)
+            # Đọc nội dung log
+            lines = log_file.readlines()[-500:]  # Lấy 500 dòng cuối
+            logs = []
+            for i, line in enumerate(reversed(lines)):
+                logs.append({"id": i + 1, "content": line.strip()})
+        return jsonify({"data": logs})
     except Exception as e:
         return jsonify({"error": f"Unable to read log file: {e}"}), 500
+
+@bp.route("/logs/<log_type>")
+def view_logs_table(log_type):
+    """Hiển thị bảng log."""
+    if log_type not in LOG_FILES:
+        return "Log type không hợp lệ!", 400
+    return render_template("logs_table.html", log_type=log_type)
+
 
 @bp.route("/", methods=["GET"])
 @login_required
