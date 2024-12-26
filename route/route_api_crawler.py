@@ -18,7 +18,7 @@ def get_tax_info_v2():
     param = request.args.get("param")
     auth_key = request.args.get("auth_key")
     request_id = request.args.get("request_id")
-
+    print("==========get_tax_info_v2 params :  ", param, auth_key, request_id)
     if not param or not auth_key or not request_id:
         return jsonify({"error": "Missing required parameters 'param', 'auth_key', or 'request_id'"}), 400
 
