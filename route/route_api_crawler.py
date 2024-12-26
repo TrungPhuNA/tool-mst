@@ -23,7 +23,7 @@ def get_tax_info_v2():
         return jsonify({"error": "Missing required parameters 'param', 'auth_key', or 'request_id'"}), 400
 
     connection = get_db_connection()
-
+    print("connection : ", connection)
     try:
         with connection.cursor(dictionary=True) as cursor:
             # Truy vấn thông tin callback dựa trên auth_key
