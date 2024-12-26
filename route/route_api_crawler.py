@@ -112,23 +112,31 @@ def process_crawler_request(param, request_id, callback_info):
         )
 
         # Gửi postback
-        # cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
-        # callback_info = cursor.fetchone()
-        # if callback_info:
-        #     send_postback_success(param, request_id, result["data"], callback_info)
-        send_postback_success(param, request_id, result["data"], callback_info)
+        success = send_postback_success(param, request_id, result["data"], callback_info)
+        cursor.execute(
+            """
+            UPDATE tax_request_log 
+            SET postback_status = %s 
+            WHERE param = %s AND request_id = %s
+            """,
+            ("success" if success else "error", param, request_id)
+        )
     else:
         # Xử lý lỗi và cập nhật trạng thái
         cursor.execute(
             "UPDATE tax_request_log SET crawler_status = 'error', retry_time = NOW() + INTERVAL 1 HOUR WHERE param = %s AND request_id = %s",
             (param, request_id)
         )
-        # cursor.execute("SELECT * FROM callback_info WHERE id = (SELECT callback_id FROM tax_request_log WHERE param = %s AND request_id = %s)", (param, request_id))
-        # callback_info = cursor.fetchone()
-        # if callback_info:
-        #     send_postback_error(param, request_id, callback_info)
-
-        send_postback_error(param, request_id, callback_info)
+        # Gửi postback
+        success = send_postback_error(param, request_id, callback_info)
+        cursor.execute(
+            """
+            UPDATE tax_request_log 
+            SET postback_status = %s 
+            WHERE param = %s AND request_id = %s
+            """,
+            ("success" if success else "error", param, request_id)
+        )
 
     connection.commit()
     cursor.close()
@@ -150,7 +158,7 @@ def send_postback_success(param, request_id, data, callback_info):
         "status": "success",
         "timestamp": datetime.now().isoformat()
     }
-    send_postback(callback_info, payload, method=callback_info['method'].upper())
+    return send_postback(callback_info, payload, method=callback_info['method'].upper())
 
 
 def send_postback_error(param, request_id, callback_info):
@@ -169,7 +177,7 @@ def send_postback_error(param, request_id, callback_info):
         "message": "Failed to process the request. Please try again later.",
         "timestamp": datetime.now().isoformat()
     }
-    send_postback(callback_info, payload, method=callback_info['method'].upper())
+    return send_postback(callback_info, payload, method=callback_info['method'].upper())
 
 
 
@@ -202,8 +210,10 @@ def send_postback(callback_info, payload, method="POST"):
             response = requests.delete(url, json=payload, headers=headers)
         else:
             print(f"Unsupported HTTP method: {method}")
-            return
+            return False
 
         print(f"Postback sent to {url}, response status: {response.status_code}, response: {response.text}")
+        return response.status_code == 200
     except requests.exceptions.RequestException as e:
         print(f"Error sending postback: {e}")
+        return False
