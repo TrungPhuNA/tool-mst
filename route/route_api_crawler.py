@@ -39,7 +39,7 @@ def get_tax_info_v2():
             print('========== request_log: ', request_log)
             if request_log:
                 if request_log['crawler_status'] in ['init', 'retry','error']:
-                    threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
+                    threading.Thread(target=process_crawler_request, args=(param, request_id, callback_info)).start()
                     return jsonify({
                         "code": "99",
                         "desc": "Crawler is still processing, please try again later",
@@ -87,81 +87,6 @@ def get_tax_info_v2():
 
     finally:
         connection.close()
-
-@bp.route("/api/v2/get-tax-info-backup", methods=["GET"])
-def get_tax_info_v2_backup():
-    """
-    API để lấy thông tin mã số thuế (tax info) với `auth_key` và `request_id`.
-    """
-    param = request.args.get("param")
-    auth_key = request.args.get("auth_key")
-    request_id = request.args.get("request_id")
-
-    if not param or not auth_key or not request_id:
-        return jsonify({"error": "Missing required parameters 'param', 'auth_key', or 'request_id'"}), 400
-
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
-
-    # Truy vấn thông tin callback dựa trên auth_key
-    cursor.execute("SELECT * FROM callback_info WHERE auth_key = %s", (auth_key,))
-    callback_info = cursor.fetchone()
-
-    if not callback_info:
-        return jsonify({"error": "Invalid auth_key or no callback configuration found"}), 401
-
-    # Kiểm tra nếu mã số thuế đã tồn tại trong log
-    cursor.execute("SELECT * FROM tax_request_log WHERE param = %s AND request_id = %s", (param, request_id))
-    request_log = cursor.fetchone()
-
-    if request_log:
-        if request_log['crawler_status'] in ['init', 'retry']:
-            threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
-            return jsonify({
-                "code": "99",
-                "desc": "Crawler is still processing, please try again later",
-                "data": {},
-                "request_id": request_id  # Bao gồm request_id trong phản hồi
-            }), 202
-
-        if request_log['crawler_status'] == 'success':
-            cursor.execute("SELECT * FROM tax_info WHERE param_search = %s", (param,))
-            result = cursor.fetchone()
-            cursor.close()
-            return jsonify({
-                "code": "00",
-                "desc": "Success - Thành công",
-                "data": {
-                    "id": result["tax_id"],
-                    "name": result["name"],
-                    "internationalName": result["international_name"],
-                    "address": result["address"],
-                    "status": result["status"],
-                    "representative": result["representative"],
-                    "management": result["management"],
-                    "activeDate": result["active_date"].strftime('%Y-%m-%d') if result["active_date"] else None,
-                    "source_url": result["source_url"]
-                },
-                "request_id": request_id  # Bao gồm request_id trong phản hồi
-            }), 200
-
-    # Nếu không có log, tạo request mới
-    cursor.execute(
-        "INSERT INTO tax_request_log (param, request_id, crawler_status, callback_id) VALUES (%s, %s, 'init', %s)",
-        (param, request_id, callback_info['id'])
-    )
-    connection.commit()
-    cursor.close()
-
-    # Gửi crawler xử lý bất đồng bộ
-    threading.Thread(target=process_crawler_request, args=(param, request_id, callback_info)).start()
-
-    return jsonify({
-        "code": "01",
-        "desc": "Request accepted, processing",
-        "data": {},
-        "request_id": request_id  # Bao gồm request_id trong phản hồi
-    }), 202
 
 def process_crawler_request(param, request_id, callback_info):
     print("============= process_crawler_request ======= ", param, request_id)
