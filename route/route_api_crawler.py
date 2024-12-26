@@ -190,7 +190,6 @@ def send_postback(callback_info, payload, method="POST"):
         payload (dict): Dữ liệu cần gửi trong postback.
         method (str): Phương thức HTTP (POST, PUT, GET, DELETE). Mặc định là POST.
     """
-    print("======== data payload post back: ", payload)
     url = callback_info['url']
     headers = json.loads(callback_info['headers']) if callback_info['headers'] else {}
     auth_key = callback_info['auth_key']
@@ -216,5 +215,7 @@ def send_postback(callback_info, payload, method="POST"):
         print(f"Postback sent to {url}, response status: {response.status_code}, response: {response.text}")
         return response.status_code == 200
     except requests.exceptions.RequestException as e:
+        print("======== data payload post back: ", payload)
+        print("======== data header post back: ", headers)
         print(f"Error sending postback: {e}")
         return False
