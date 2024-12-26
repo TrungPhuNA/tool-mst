@@ -45,11 +45,13 @@ from route.route_api import bp as route_api
 from route.route_web import bp as route_web
 from route.route_auth import bp as route_auth
 from route.route_api_crawler import bp as route_api_crawler
+from route.route_api_test import bp as route_api_test
 
 app.register_blueprint(route_api)
 app.register_blueprint(route_web)
 app.register_blueprint(route_auth)
 app.register_blueprint(route_api_crawler)
+app.register_blueprint(route_api_test)
 
 @login_manager.user_loader
 def load_user(user_id):
