@@ -36,6 +36,7 @@ def get_tax_info_v2():
             # Kiểm tra nếu mã số thuế đã tồn tại trong log
             cursor.execute("SELECT * FROM tax_request_log WHERE param = %s AND request_id = %s", (param, request_id))
             request_log = cursor.fetchone()
+            print('========== request_log: ', request_log)
             if request_log:
                 if request_log['crawler_status'] in ['init', 'retry','error']:
                     threading.Thread(target=process_crawler_request, args=(param, request_id)).start()
