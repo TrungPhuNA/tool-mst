@@ -13,8 +13,8 @@ import time
 # Tạo Blueprint cho các route
 bp = Blueprint('route_api_crawler', __name__)
 
-@bp.route("/api/v3/get-tax-info", methods=["GET"])
-def get_tax_info_v3():
+@bp.route("/api/v2/get-tax-info", methods=["GET"])
+def get_tax_info_v2():
     param = request.args.get("param")
     auth_key = request.args.get("auth_key")
     request_id = request.args.get("request_id")
@@ -66,6 +66,14 @@ def get_tax_info_v3():
                         "request_id": request_id
                     }), 200
 
+                return jsonify({
+                    "code": "99",
+                    "desc": "Crawler is error, please try again later",
+                    "data": {},
+                    "request_id": request_id
+                }), 202
+
+
         with connection.cursor(dictionary=True) as cursor:
             # Nếu không có log, tạo request mới
             cursor.execute(
@@ -86,8 +94,8 @@ def get_tax_info_v3():
     finally:
         connection.close()
 
-@bp.route("/api/v2/get-tax-info", methods=["GET"])
-def get_tax_info_v2():
+@bp.route("/api/v2/get-tax-info-backup", methods=["GET"])
+def get_tax_info_v2_backup():
     """
     API để lấy thông tin mã số thuế (tax info) với `auth_key` và `request_id`.
     """
