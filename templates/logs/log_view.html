@@ -1,0 +1,18 @@
+{% extends "layouts/app_master.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">{{ log_type | capitalize }} Logs</h1>
+
+    <div class="bg-dark text-light p-3" style="height: 80vh; overflow-y: auto;">
+        <pre>
+{% for line in content %}
+{{ line }}
+{% endfor %}
+        </pre>
+    </div>
+
+    <div class="text-center mt-3">
+        <button class="btn btn-primary" onclick="location.reload();">Refresh</button>
+    </div>
+</div>
+{% endblock %}

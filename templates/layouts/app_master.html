@@ -61,6 +61,23 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.path.startswith('/logs/post-back') %}active{% endif %}" href="/logs/post-back">Postback</a>
                         </li>
+
+                        <!-- Dropdown Logs -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {% if request.path.startswith('/logs') %}active{% endif %}" href="#" id="navbarDropdownLogs"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Logs
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownLogs">
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/logs/nohup' %}active{% endif %}" href="/logs/nohup">Nohup Logs</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {% if request.path == '/logs/gunicorn_error' %}active{% endif %}" href="/logs/gunicorn_error">Gunicorn Logs</a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link">Xin chào, {{ session.get("username") }}</a>
                         </li>
@@ -79,6 +96,7 @@
             </div>
         </div>
     </nav>
+
 
     <!-- Main Content -->
     <main>

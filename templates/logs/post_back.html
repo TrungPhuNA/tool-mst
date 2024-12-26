@@ -117,18 +117,19 @@
                     "render": function (data, type, row) {
                         return `
                             <div class="d-inline-flex align-items-center">
-                                <button class="btn btn-danger btn-sm delete-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.3rem 0.5rem; font-size: 10px; margin-right: 5px;">
+                                <button class="btn btn-danger btn-sm delete-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.1rem 0.2rem; font-size: 10px; margin-right: 5px;">
                                     <i class="fa-solid fa-trash-alt" style="margin-right: 5px"></i> Xóa
                                 </button>
                                 ${row.postback_status === 'pending' || row.postback_status === 'error' ? `
-                                <button class="btn btn-primary btn-sm resend-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.3rem 0.5rem; font-size: 10px;">
+                                <button class="btn btn-primary btn-sm resend-btn d-flex align-items-center justify-content-center" data-id="${row.id}" style="padding: 0.1rem 0.2rem; font-size: 10px;">
                                     <i class="fa-solid fa-paper-plane" style="margin-right: 5px"></i> Bắn lại
                                 </button>` : ''}
                             </div>
                         `;
                     },
                     "orderable": false,
-                    "searchable": false
+                    "searchable": false,
+                    "width": "12%"
                 },
             ],
             "language": {
