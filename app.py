@@ -79,8 +79,10 @@ def require_login():
         if fnmatch.fnmatch(request.path, pattern):
             return
 
+    return
     # Chặn các route cần login
     if "user_id" not in session:
+        print("========== Login ======== ")
         return redirect(url_for("route_auth.login"))
 
     return
