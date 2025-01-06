@@ -33,9 +33,12 @@ def save_to_db(data):
         if not active_date:
             active_date = None
 
+        status = data.get('status', 'chưa cập nhật')
+        representative = data.get('representative', None)
+        management = data.get('management', None)
+        source_url = data.get('source_url', None)
         if result:
             print("Data already exists in DB, updating:", result)
-
             # Cập nhật dữ liệu nếu đã tồn tại
             cursor.execute("""
                 UPDATE tax_info
@@ -53,11 +56,11 @@ def save_to_db(data):
             """, (
                 data['name'],
                 data['address'],
-                data['status'],
-                data['representative'],
-                data['management'],
+                status,
+                representative,
+                management,
                 active_date,
-                data['source_url'],
+                source_url,
                 data['internationalName'],
                 data['param_search'],
                 data['duration'],
@@ -72,11 +75,11 @@ def save_to_db(data):
                 "id": data['id'],
                 "name": data['name'],
                 "address": data['address'],
-                "status": data['status'],
-                "representative": data['representative'],
-                "management": data['management'],
+                "status": status,
+                "representative": representative,
+                "management": management,
                 "activeDate": active_date,
-                "source_url": data['source_url'],
+                "source_url": source_url,
                 "internationalName": data['internationalName'],
                 "param_search": data['param_search'],
                 "duration": data['duration']
@@ -93,11 +96,11 @@ def save_to_db(data):
             data['id'],
             data['name'],
             data['address'],
-            data['status'],
-            data['representative'],
-            data['management'],
+            status,
+            representative,
+            management,
             active_date,
-            data['source_url'],
+            source_url,
             data['internationalName'],
             data['param_search'],
             data['duration']

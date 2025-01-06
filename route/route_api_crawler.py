@@ -88,12 +88,114 @@ def get_tax_info_v2():
     finally:
         connection.close()
 
+
 def process_crawler_request(param, request_id, callback_info):
     print("============= process_crawler_request ======= ", param, request_id)
     start_time = time.time()
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    # Crawl dữ liệu
+
+    # Call API first
+    api_result = call_vietqr_api(param)
+
+    if api_result and api_result.get("code") == "00":
+        data = api_result["data"]
+        data["crawler_status"] = "success"
+        end_time = time.time()
+        data["duration"] = end_time - start_time
+        data["param_search"] = data["id"]
+        print('============= data call api ',data)
+        # Save data to tax_info
+        data_insert = save_to_db(data)
+        print("============ dataInsert (API): ", data_insert)
+        tax_info_id = data_insert["tax_info_id"]
+
+        # Update tax_request_log
+        cursor.execute(
+            """
+            UPDATE tax_request_log 
+            SET crawler_status = 'success', tax_info_id = %s, duration_process = %s 
+            WHERE param = %s AND request_id = %s
+            """,
+            (tax_info_id, data.get("duration", 0), param, request_id)
+        )
+
+        # Send postback
+        success = send_postback_success(param, request_id, data, callback_info)
+        cursor.execute(
+            """
+            UPDATE tax_request_log 
+            SET postback_status = %s 
+            WHERE param = %s AND request_id = %s
+            """,
+            ("success" if success else "error", param, request_id)
+        )
+    else:
+        # If API fails, fallback to crawler
+        result = crawl_masothue(param)
+
+        if result and result["code"] == "00":
+            end_time = time.time()
+            duration = end_time - start_time
+            result["data"]["crawler_status"] = "success"
+            result["data"]["duration"] = duration
+
+            # Save data to tax_info
+            data_insert = save_to_db(result["data"])
+            print("============ dataInsert (Crawler): ", data_insert)
+            tax_info_id = data_insert["tax_info_id"]
+
+            # Update tax_request_log
+            cursor.execute(
+                """
+                UPDATE tax_request_log 
+                SET crawler_status = 'success', tax_info_id = %s, duration_process = %s 
+                WHERE param = %s AND request_id = %s
+                """,
+                (tax_info_id, result["data"].get("duration", 0), param, request_id)
+            )
+
+            # Send postback
+            success = send_postback_success(param, request_id, result["data"], callback_info)
+            cursor.execute(
+                """
+                UPDATE tax_request_log 
+                SET postback_status = %s 
+                WHERE param = %s AND request_id = %s
+                """,
+                ("success" if success else "error", param, request_id)
+            )
+        else:
+            # Handle failure
+            cursor.execute(
+                """
+                UPDATE tax_request_log 
+                SET crawler_status = 'error', retry_time = NOW() + INTERVAL 1 HOUR 
+                WHERE param = %s AND request_id = %s
+                """,
+                (param, request_id)
+            )
+
+            # Send postback
+            success = send_postback_error(param, request_id, callback_info)
+            cursor.execute(
+                """
+                UPDATE tax_request_log 
+                SET postback_status = %s 
+                WHERE param = %s AND request_id = %s
+                """,
+                ("success" if success else "error", param, request_id)
+            )
+
+    connection.commit()
+    cursor.close()
+
+def process_crawler_request_old(param, request_id, callback_info):
+    print("============= process_crawler_request ======= ", param, request_id)
+    start_time = time.time()
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    # Crawl dữ liệu //
     result = crawl_masothue(param)
 
     if result and result["code"] == "00":
@@ -233,3 +335,19 @@ def send_postback(callback_info, payload, method="POST"):
         print("======== data header post back: ", sanitized_headers)
         print(f"Error sending postback: {e}")
         return False
+
+
+def call_vietqr_api(param):
+    try:
+        url = f"https://api.vietqr.io/v2/business/{param}"
+        headers = {
+            "Cookie": "connect.sid=s%3ATX3n72hThnvMX13GsIfkFKXMwHfgW4-g.wxn7saqQxnYqy8jBJjO2MuD8SzpmYZ9BcDDc%2BUy8Doc"
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    except Exception as e:
+        print("Error calling VietQR API:", e)
+        return None
