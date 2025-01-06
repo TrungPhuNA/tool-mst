@@ -20,15 +20,14 @@ def get_tax_info():
 
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    print("=========== connect success")
     # Kiểm tra nếu mã số thuế đã tồn tại trong DB
     cursor.execute("SELECT * FROM tax_info WHERE param_search = %s", (param,))
     result = cursor.fetchone()
     cursor.close()
-    print("=========== close connect success")
+    print("=========== result", result)
     if result:
         # Nếu có dữ liệu, kiểm tra trạng thái của crawler
-        if result['crawler_status'] == 'retry' and result['retry_time'] > datetime.now():
+        if result['crawler_status'] == 'retry' and result['retry_time'] and result['retry_time'] > datetime.now():
             return jsonify({
                 "code": "99",
                 "desc": "Crawler is retrying, please try again later",
